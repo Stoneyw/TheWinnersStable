@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Hanken Grotesk',system-ui,sans-serif;background:#EBE2CF;color:#2A2521;-webkit-font-smoothing:antialiased}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#cdbf9f;border-radius:8px;border:3px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-track{background:transparent}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  image-slot.photo-drop::part(frame){background:linear-gradient(180deg,rgba(20,14,6,.10),rgba(20,14,6,.46))}
+  image-slot.photo-drop::part(empty){color:rgba(255,248,236,.94);font-weight:600}
+  image-slot.photo-drop::part(ring){border-color:rgba(255,248,236,.45)}
+  image-slot.photo-drop[data-over]::part(frame){background:linear-gradient(180deg,rgba(60,122,87,.35),rgba(28,58,46,.55))}
+</style>
+<script src="image-slot.js"></script>
+</helmet>
+
+<div style="display:flex;height:100vh;overflow:hidden;width:100%;background:#EBE2CF">
+
+  <!-- mobile overlay -->
+  <div style="{{ overlayStyle }}" onClick="{{ closeSidebar }}"></div>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside style="{{ sidebarStyle }}">
+    <sc-if value="{{ isMobile }}" hint-placeholder-val="">
+      <button onClick="{{ closeSidebar }}" style="position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#E9E2D0;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1">×</button>
+    </sc-if>
+    <div style="padding:22px 20px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.07)">
+      <div style="width:42px;height:42px;border-radius:11px;background:linear-gradient(150deg,#C99A4A,#9c7026);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.25)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C3A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V8l4-3 4 3v3h3a3 3 0 0 1 3 3v7"/><path d="M5 14h6"/><path d="M9 21v-4"/></svg>
+      </div>
+      <div>
+        <div style="font-family:'Spectral',serif;font-weight:700;font-size:16.5px;line-height:1;letter-spacing:.2px">The Winners Stable</div>
+        <div style="font-size:11px;color:#9DBCA8;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px">Georgetown, TX</div>
+      </div>
+    </div>
+
+    <!-- role switcher -->
+    <div style="padding:14px 16px 6px">
+      <div style="font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:#7FA089;margin-bottom:8px;padding-left:4px">Viewing as</div>
+      <div style="display:flex;background:rgba(0,0,0,.22);border-radius:10px;padding:3px;gap:2px">
+        <sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+          <button onClick="{{ r.onClick }}" style="{{ r.style }}" style-hover="opacity:.92">{{ r.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <nav style="flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:3px">
+      <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="8">
+        <button onClick="{{ n.onClick }}" style="{{ n.style }}" style-hover="background:rgba(255,255,255,.06)">
+          <span style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0" innerHTML="{{ n.icon }}"></span>
+          <span style="flex:1;text-align:left">{{ n.label }}</span>
+          <sc-if value="{{ n.badge }}" hint-placeholder-val="">
+            <span style="background:#B4502E;color:#fff;font-size:10.5px;font-weight:700;min-width:18px;height:18px;padding:0 5px;border-radius:9px;display:flex;align-items:center;justify-content:center">{{ n.badge }}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </nav>
+
+    <div style="padding:12px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:11px">
+      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(150deg,#3C7A57,#2a5b3e);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0">{{ currentUserInitials }}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ currentUserName }}</div>
+        <div style="font-size:11.5px;color:#9DBCA8">{{ currentUserRole }}</div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9DBCA8" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.2.6.74 1.05 1.4 1.18"/></svg>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+
+    <!-- topbar -->
+    <header style="height:70px;flex-shrink:0;background:rgba(247,242,231,.86);backdrop-filter:blur(8px);border-bottom:1px solid #E0D5BC;display:flex;align-items:center;gap:18px;padding:0 28px;position:sticky;top:0;z-index:20">
+      <sc-if value="{{ isMobile }}" hint-placeholder-val="">
+        <button onClick="{{ toggleSidebar }}" style="width:38px;height:38px;border-radius:10px;border:1px solid #E4D9C0;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;flex-shrink:0" style-hover="background:#FBF6EC">
+          <span style="width:18px;height:2px;background:#5a5345;border-radius:2px"></span>
+          <span style="width:18px;height:2px;background:#5a5345;border-radius:2px"></span>
+          <span style="width:18px;height:2px;background:#5a5345;border-radius:2px"></span>
+        </button>
+      </sc-if>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Spectral',serif;font-size:23px;font-weight:600;color:#23201C;line-height:1.1">{{ pageTitle }}</div>
+        <div style="font-size:12.5px;color:#8A8170;margin-top:1px">{{ pageSub }}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #E4D9C0;border-radius:11px;padding:9px 13px;width:248px;color:#9a9081">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+        <span style="font-size:13.5px">Search horses, people…</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E4D9C0;border-radius:11px;padding:8px 13px">
+        <span style="font-size:18px">☀️</span>
+        <div style="line-height:1.05"><div style="font-size:13px;font-weight:700;color:#3a342b">78°</div><div style="font-size:10.5px;color:#8A8170">Clear</div></div>
+      </div>
+      <button style="position:relative;width:42px;height:42px;border:1px solid #E4D9C0;background:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:#FBF6EC">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5a5345" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span style="position:absolute;top:8px;right:9px;width:8px;height:8px;background:#B4502E;border-radius:50%;border:2px solid #fff"></span>
+      </button>
+      <button onClick="{{ goNewTask }}" style="display:flex;align-items:center;gap:7px;background:#1C3A2E;color:#F1EBDB;border:none;border-radius:11px;padding:11px 16px;font-family:'Hanken Grotesk';font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(28,58,46,.25)" style-hover="background:#234738">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F3EEDF" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        New
+      </button>
+    </header>
+
+    <!-- content -->
+    <main style="flex:1;overflow-y:auto;padding:26px 28px 56px">
+
+      <!-- ===== DASHBOARD ===== -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width:1240px;margin:0 auto">
+
+          <!-- greeting + stats -->
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px;flex-wrap:wrap">
+            <div>
+              <h1 style="font-family:'Spectral',serif;font-size:30px;font-weight:600;color:#23201C;line-height:1.1">{{ greeting }}</h1>
+              <p style="font-size:14.5px;color:#8A8170;margin-top:6px">{{ todayLong }} · {{ dashboardSummary }}</p>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="5">
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:15px;padding:16px 17px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+                <div style="display:flex;align-items:center;gap:8px;color:#8A8170">
+                  <span style="width:17px;height:17px;display:flex" innerHTML="{{ s.icon }}"></span>
+                  <span style="font-size:12px;font-weight:600;letter-spacing:.2px">{{ s.label }}</span>
+                </div>
+                <div style="font-family:'Spectral',serif;font-size:31px;font-weight:600;color:#23201C;margin-top:9px;line-height:1">{{ s.value }}</div>
+                <div style="font-size:11.5px;color:{{ s.tone }};margin-top:5px;font-weight:600">{{ s.delta }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- two columns -->
+          <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:18px;align-items:start">
+
+            <!-- LEFT -->
+            <div style="display:flex;flex-direction:column;gap:18px">
+
+              <!-- arena schedule -->
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px">
+                  <div style="font-family:'Spectral',serif;font-size:18px;font-weight:600;color:#23201C">Today in the arenas</div>
+                  <button onClick="{{ goCalendar }}" style="font-size:12.5px;font-weight:600;color:#3C7A57;background:none;border:none;cursor:pointer">Open calendar →</button>
+                </div>
+                <div style="padding:2px 12px 12px">
+                  <sc-for list="{{ upcomingEvents }}" as="e" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:14px;padding:11px 8px;border-radius:11px" style-hover="background:#FAF6EC">
+                      <div style="width:62px;flex-shrink:0;text-align:right">
+                        <div style="font-size:13.5px;font-weight:700;color:#3a342b">{{ e.start }}</div>
+                        <div style="font-size:11px;color:#9a9081">{{ e.end }}</div>
+                      </div>
+                      <div style="width:4px;height:34px;border-radius:3px;background:{{ e.color }};flex-shrink:0"></div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:14px;font-weight:600;color:#2f2a23">{{ e.title }}</div>
+                        <div style="font-size:12px;color:#8A8170">{{ e.who }}</div>
+                      </div>
+                      <span style="font-size:11px;font-weight:600;color:#5a5345;background:#F1EADA;border:1px solid #E4D9C0;padding:4px 10px;border-radius:20px;flex-shrink:0">{{ e.arena }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <!-- daily tasks -->
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 4px">
+                  <div style="font-family:'Spectral',serif;font-size:18px;font-weight:600;color:#23201C">Daily tasks</div>
+                  <div style="font-size:12.5px;color:#8A8170;font-weight:600">{{ tasksDoneCount }} of {{ tasksTotal }} done</div>
+                </div>
+                <div style="padding:8px 20px 4px">
+                  <div style="height:7px;background:#EDE5D2;border-radius:6px;overflow:hidden">
+                    <div style="height:100%;width:{{ taskPct }};background:linear-gradient(90deg,#3C7A57,#5a9b71);border-radius:6px;transition:width .3s"></div>
+                  </div>
+                </div>
+                <div style="padding:8px 12px 14px">
+                  <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="6">
+                    <div onClick="{{ t.onToggle }}" style="display:flex;align-items:center;gap:13px;padding:10px 8px;border-radius:11px;cursor:pointer" style-hover="background:#FAF6EC">
+                      <div style="{{ t.checkStyle }}">
+                        <sc-if value="{{ t.done }}" hint-placeholder-val="">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        </sc-if>
+                      </div>
+                      <div style="flex:1;min-width:0">
+                        <div style="{{ t.titleStyle }}">{{ t.title }}</div>
+                        <div style="font-size:11.5px;color:#9a9081">{{ t.area }} · {{ t.time }}</div>
+                      </div>
+                      <div title="{{ t.assignee }}" style="width:26px;height:26px;border-radius:50%;background:{{ t.assigneeColor }};color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ t.assigneeInitials }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div style="display:flex;flex-direction:column;gap:18px">
+
+              <!-- health alerts -->
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;box-shadow:0 1px 2px rgba(40,30,15,.04);overflow:hidden">
+                <div style="display:flex;align-items:center;gap:9px;padding:16px 18px 12px;border-bottom:1px solid #F0E9D8">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B4502E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                  <div style="font-family:'Spectral',serif;font-size:17px;font-weight:600;color:#23201C;flex:1">Health alerts</div>
+                  <span style="background:#FBEAE2;color:#B4502E;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px">{{ alertCount }} due</span>
+                </div>
+                <div style="padding:6px 10px 10px">
+                  <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="4">
+                    <div onClick="{{ a.onClick }}" style="display:flex;align-items:center;gap:12px;padding:10px 9px;border-radius:11px;cursor:pointer" style-hover="background:#FAF6EC">
+                      <div style="width:34px;height:34px;border-radius:9px;background:{{ a.coat }};flex-shrink:0;display:flex;align-items:flex-end;justify-content:center;color:rgba(255,255,255,.92);font-family:'Spectral',serif;font-size:13px;font-weight:600;padding-bottom:2px">{{ a.initial }}</div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:13.5px;font-weight:600;color:#2f2a23">{{ a.horse }}</div>
+                        <div style="font-size:11.5px;color:#9a9081">{{ a.label }}</div>
+                      </div>
+                      <span style="{{ a.tagStyle }}">{{ a.due }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <!-- PM feed -->
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px">
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9c7026" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 12.5a2 2 0 0 1-2 1.5h-9a2 2 0 0 1-2-1.5Z"/><path d="M4 7l1-3h14l1 3"/></svg>
+                    <div style="font-family:'Spectral',serif;font-size:17px;font-weight:600;color:#23201C">PM feed round</div>
+                  </div>
+                  <button onClick="{{ goFeeding }}" style="font-size:12px;font-weight:600;color:#3C7A57;background:none;border:none;cursor:pointer">All →</button>
+                </div>
+                <div style="padding:2px 10px 12px">
+                  <sc-for list="{{ pmFeed }}" as="f" hint-placeholder-count="4">
+                    <div onClick="{{ f.onToggle }}" style="display:flex;align-items:center;gap:12px;padding:9px;border-radius:11px;cursor:pointer" style-hover="background:#FAF6EC">
+                      <div style="{{ f.checkStyle }}">
+                        <sc-if value="{{ f.done }}" hint-placeholder-val="">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        </sc-if>
+                      </div>
+                      <div style="width:30px;height:30px;border-radius:8px;background:{{ f.coat }};flex-shrink:0"></div>
+                      <div style="flex:1;min-width:0">
+                        <div style="{{ f.nameStyle }}">{{ f.name }}</div>
+                        <div style="font-size:11.5px;color:#9a9081;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.ration }}</div>
+                      </div>
+                      <span style="font-size:11px;font-weight:600;color:#8A8170;flex-shrink:0">{{ f.stall }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <!-- messages -->
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px">
+                  <div style="font-family:'Spectral',serif;font-size:17px;font-weight:600;color:#23201C">Messages</div>
+                  <button onClick="{{ goMessages }}" style="font-size:12px;font-weight:600;color:#3C7A57;background:none;border:none;cursor:pointer">Inbox →</button>
+                </div>
+                <div style="padding:2px 10px 12px">
+                  <sc-for list="{{ recentMessages }}" as="m" hint-placeholder-count="3">
+                    <div onClick="{{ m.onClick }}" style="display:flex;align-items:center;gap:12px;padding:9px;border-radius:11px;cursor:pointer" style-hover="background:#FAF6EC">
+                      <div style="width:34px;height:34px;border-radius:50%;background:{{ m.color }};color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ m.initials }}</div>
+                      <div style="flex:1;min-width:0">
+                        <div style="display:flex;align-items:center;gap:6px"><span style="font-size:13.5px;font-weight:600;color:#2f2a23">{{ m.name }}</span><span style="font-size:10px;color:#aaa093;background:#F1EADA;padding:1px 6px;border-radius:10px">{{ m.role }}</span></div>
+                        <div style="font-size:12px;color:#9a9081;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.snippet }}</div>
+                      </div>
+                      <sc-if value="{{ m.unread }}" hint-placeholder-val="">
+                        <span style="width:9px;height:9px;background:#3C7A57;border-radius:50%;flex-shrink:0"></span>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== HORSES DIRECTORY ===== -->
+      <sc-if value="{{ isHorses }}" hint-placeholder-val="">
+        <div style="max-width:1240px;margin:0 auto">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+            <div style="font-family:'Spectral',serif;font-size:21px;font-weight:600;color:#23201C;flex:1">{{ horsesHeading }}</div>
+            <div style="display:flex;gap:7px">
+              <span style="font-size:12.5px;font-weight:600;color:#1C3A2E;background:#fff;border:1px solid #1C3A2E;padding:7px 14px;border-radius:20px">All</span>
+              <span style="font-size:12.5px;font-weight:600;color:#7c7363;background:#fff;border:1px solid #E4D9C0;padding:7px 14px;border-radius:20px">Full board</span>
+              <span style="font-size:12.5px;font-weight:600;color:#7c7363;background:#fff;border:1px solid #E4D9C0;padding:7px 14px;border-radius:20px">Pasture</span>
+              <span style="font-size:12.5px;font-weight:600;color:#7c7363;background:#fff;border:1px solid #E4D9C0;padding:7px 14px;border-radius:20px">In training</span>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:16px">
+            <sc-for list="{{ horseCards }}" as="h" hint-placeholder-count="8">
+              <div onClick="{{ h.onClick }}" style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(40,30,15,.04);transition:.18s" style-hover="box-shadow:0 10px 28px rgba(40,30,15,.13);transform:translateY(-3px)">
+                <div style="height:138px;background:{{ h.photoBg }};position:relative;display:flex;align-items:center;justify-content:center">
+                  <sc-if value="{{ h.noPhoto }}" hint-placeholder-val="{{ true }}">
+                    <span style="font-family:'Spectral',serif;font-size:64px;font-weight:600;color:rgba(255,255,255,.32)">{{ h.initial }}</span>
+                    <span style="position:absolute;bottom:10px;left:12px;font-size:10.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.8)">{{ h.coatName }}</span>
+                    <span style="position:absolute;bottom:9px;right:11px;width:24px;height:24px;border-radius:7px;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L19 6h0a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="12.5" r="3.2"/></svg>
+                    </span>
+                  </sc-if>
+                  <span style="{{ h.statusStyle }};position:absolute;top:11px;right:11px;backdrop-filter:blur(2px)">{{ h.statusLabel }}</span>
+                </div>
+                <div style="padding:14px 16px 16px">
+                  <div style="font-family:'Spectral',serif;font-size:19px;font-weight:600;color:#23201C">{{ h.name }}</div>
+                  <div style="font-size:12.5px;color:#8A8170;margin-top:2px">{{ h.breed }} · {{ h.sex }} · {{ h.age }}</div>
+                  <div style="height:1px;background:#F0E9D8;margin:13px 0 11px"></div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#5a5345;margin-bottom:6px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9a9081" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+                    <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.owner }}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#5a5345">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9a9081" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 5l8 6"/><path d="M6 10v9h12v-9"/></svg>
+                    <span>{{ h.stall }} · {{ h.board }}</span>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== HORSE PROFILE ===== -->
+      <sc-if value="{{ isHorseProfile }}" hint-placeholder-val="">
+        <div style="max-width:1180px;margin:0 auto">
+          <button onClick="{{ hp.backToHorses }}" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#7c7363;font-family:'Hanken Grotesk';font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px" style-hover="color:#1C3A2E">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> All horses
+          </button>
+          <div style="display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start">
+
+            <!-- left -->
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+                <div style="position:relative">
+                  <image-slot id="{{ hp.slot }}" class="photo-drop" shape="rect" placeholder="{{ hp.dropLabel }}" style="display:block;width:100%;height:230px;background:{{ hp.coat }}"></image-slot>
+                  <span style="position:absolute;bottom:12px;left:14px;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.82);pointer-events:none">{{ hp.coatName }} coat</span>
+                </div>
+                <div style="padding:18px 20px 20px">
+                  <h2 style="font-family:'Spectral',serif;font-size:28px;font-weight:600;color:#23201C;line-height:1">{{ hp.name }}</h2>
+                  <sc-if value="{{ hp.notEditing }}" hint-placeholder-val="{{ true }}">
+                    <p style="font-size:13.5px;color:#8A8170;margin-top:5px">{{ hp.breed }}</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px">
+                      <div><div style="font-size:11px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px">Sex</div><div style="font-size:14px;font-weight:600;color:#2f2a23;margin-top:2px">{{ hp.sex }}</div></div>
+                      <div><div style="font-size:11px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px">Age</div><div style="font-size:14px;font-weight:600;color:#2f2a23;margin-top:2px">{{ hp.age }}</div></div>
+                      <div><div style="font-size:11px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px">Height</div><div style="font-size:14px;font-weight:600;color:#2f2a23;margin-top:2px">{{ hp.height }}</div></div>
+                      <div><div style="font-size:11px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px">Stall</div><div style="font-size:14px;font-weight:600;color:#2f2a23;margin-top:2px">{{ hp.stall }}</div></div>
+                      <div><div style="font-size:11px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px">Board</div><div style="font-size:14px;font-weight:600;color:#2f2a23;margin-top:2px">{{ hp.board }}</div></div>
+                      <div><div style="font-size:11px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px">Arrived</div><div style="font-size:14px;font-weight:600;color:#2f2a23;margin-top:2px">{{ hp.arrived }}</div></div>
+                    </div>
+                    <button onClick="{{ hp.onEdit }}" style="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:14px;background:#FBF6EC;border:1px solid #E4D9C0;color:#5a5345;font-size:13px;font-weight:600;padding:10px;border-radius:10px;cursor:pointer;font-family:'Hanken Grotesk'" style-hover="background:#F3EBD6">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9c7026" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                      Edit info &amp; feeding
+                    </button>
+                  </sc-if>
+                  <sc-if value="{{ hp.editMode }}" hint-placeholder-val="">
+                    {{ hp.editForm }}
+                  </sc-if>
+                </div>
+              </div>
+              <!-- owner -->
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+                <div style="font-size:11px;color:#9a9081;text-transform:uppercase;letter-spacing:.6px;margin-bottom:11px">Owner</div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:42px;height:42px;border-radius:50%;background:{{ hp.ownerColor }};color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center">{{ hp.ownerInitials }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:15px;font-weight:600;color:#2f2a23">{{ hp.owner }}</div>
+                    <div style="font-size:12.5px;color:#8A8170">{{ hp.ownerPhone }}</div>
+                  </div>
+                  <button style="width:36px;height:36px;border-radius:10px;border:1px solid #E4D9C0;background:#FBF6EC;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3C7A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4V6a1 1 0 0 1 1-1Z"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- right -->
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <!-- feeding -->
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+                <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9c7026" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8Z"/><path d="M5 8l1-3.5h12L19 8"/></svg>
+                  <div style="font-family:'Spectral',serif;font-size:18px;font-weight:600;color:#23201C">Feeding plan</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <div style="background:#FBF6EC;border:1px solid #EFE6D0;border-radius:12px;padding:13px 15px">
+                    <div style="font-size:11px;font-weight:700;color:#9c7026;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">☀ AM feed</div>
+                    <div style="font-size:13.5px;color:#3a342b;line-height:1.45">{{ hp.am }}</div>
+                  </div>
+                  <div style="background:#F2F5EE;border:1px solid #DDE7D5;border-radius:12px;padding:13px 15px">
+                    <div style="font-size:11px;font-weight:700;color:#3C7A57;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">☾ PM feed</div>
+                    <div style="font-size:13.5px;color:#3a342b;line-height:1.45">{{ hp.pm }}</div>
+                  </div>
+                </div>
+                <div style="margin-top:12px;display:flex;align-items:center;gap:9px;font-size:13px;color:#5a5345"><span style="font-weight:600;color:#7A4A2B">Supplements:</span> {{ hp.supp }}</div>
+              </div>
+
+              {{ hpMedCards }}
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== BOARDERS ===== -->
+      <sc-if value="{{ isBoarders }}" hint-placeholder-val="">
+        <div style="max-width:1100px;margin:0 auto">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px">
+            <sc-for list="{{ boarderCards }}" as="b" hint-placeholder-count="6">
+              <div onClick="{{ b.onClick }}" style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;padding:18px;cursor:pointer;box-shadow:0 1px 2px rgba(40,30,15,.04);transition:.18s" style-hover="box-shadow:0 10px 26px rgba(40,30,15,.12);transform:translateY(-2px)">
+                <div style="display:flex;align-items:center;gap:13px">
+                  <div style="width:50px;height:50px;border-radius:50%;background:{{ b.avatarBg }};color:#fff;font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <sc-if value="{{ b.noPhoto }}" hint-placeholder-val="{{ true }}"><span>{{ b.initials }}</span></sc-if>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:16.5px;font-weight:600;color:#23201C">{{ b.name }}</div>
+                    <div style="font-size:12.5px;color:#8A8170">Boarding since {{ b.since }}</div>
+                  </div>
+                  <span style="{{ b.balanceStyle }}">{{ b.balance }}</span>
+                </div>
+                <div style="height:1px;background:#F0E9D8;margin:14px 0"></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#5a5345;margin-bottom:7px">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9a9081" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V9l4-3 3 2.5h3a3 3 0 0 1 3 3V21"/><path d="M5 13h6"/></svg>
+                  <span style="font-weight:600;color:#3a342b">{{ b.horseCount }}:</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.horseNames }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#5a5345">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9a9081" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 6 12 13 2 6"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+                  <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.email }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== BOARDER PROFILE ===== -->
+      <sc-if value="{{ isBoarderProfile }}" hint-placeholder-val="">
+        <div style="max-width:1000px;margin:0 auto">
+          <button onClick="{{ bp.backToBoarders }}" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#7c7363;font-family:'Hanken Grotesk';font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px" style-hover="color:#1C3A2E">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> All boarders
+          </button>
+          <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start">
+            <div style="background:#fff;border:1px solid #E8DFCC;border-radius:18px;padding:24px 22px;box-shadow:0 1px 2px rgba(40,30,15,.04);text-align:center">
+              <image-slot id="{{ bp.slot }}" class="photo-drop" shape="circle" placeholder="Drop photo" style="display:block;width:88px;height:88px;margin:0 auto 14px;background:{{ bp.color }}"></image-slot>
+              <h2 style="font-family:'Spectral',serif;font-size:23px;font-weight:600;color:#23201C">{{ bp.name }}</h2>
+              <p style="font-size:13px;color:#8A8170;margin-top:3px">Boarding client since {{ bp.sinceLabel }}</p>
+              <div style="display:flex;gap:9px;margin-top:18px">
+                <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:#1C3A2E;color:#F1EBDB;border:none;border-radius:11px;padding:11px;font-family:'Hanken Grotesk';font-size:13px;font-weight:600;cursor:pointer">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F1EBDB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4V6a1 1 0 0 1 1-1Z"/></svg> Message
+                </button>
+                <button style="width:44px;border:1px solid #E4D9C0;background:#FBF6EC;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5a5345" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/></svg>
+                </button>
+              </div>
+              <div style="height:1px;background:#F0E9D8;margin:18px 0"></div>
+              <sc-if value="{{ bp.notEditing }}" hint-placeholder-val="{{ true }}">
+                <div style="text-align:left;display:flex;flex-direction:column;gap:11px">
+                  <div style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#5a5345"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9a9081" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/></svg>{{ bp.phone }}</div>
+                  <div style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#5a5345"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9a9081" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 6 12 13 2 6"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg>{{ bp.email }}</div>
+                </div>
+                <button onClick="{{ bp.onEdit }}" style="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:14px;background:#FBF6EC;border:1px solid #E4D9C0;color:#5a5345;font-size:13px;font-weight:600;padding:10px;border-radius:10px;cursor:pointer;font-family:'Hanken Grotesk'" style-hover="background:#F3EBD6">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9c7026" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  Edit info
+                </button>
+              </sc-if>
+              <sc-if value="{{ bp.editMode }}" hint-placeholder-val="">
+                {{ bp.editForm }}
+              </sc-if>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px rgba(40,30,15,.04);display:flex;align-items:center;gap:18px">
+                <div style="flex:1"><div style="font-size:12px;color:#9a9081;text-transform:uppercase;letter-spacing:.6px">Account</div><div style="font-size:14px;font-weight:600;color:{{ bp.balanceColor }};margin-top:4px">{{ bp.balanceLabel }}</div></div>
+                <div style="font-family:'Spectral',serif;font-size:30px;font-weight:600;color:{{ bp.balanceColor }}">{{ bp.balance }}</div>
+                <button style="background:#FBF6EC;border:1px solid #E4D9C0;color:#5a5345;font-size:13px;font-weight:600;padding:9px 16px;border-radius:10px;cursor:pointer;font-family:'Hanken Grotesk'">View invoices</button>
+              </div>
+              <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+                <div style="font-family:'Spectral',serif;font-size:18px;font-weight:600;color:#23201C;margin-bottom:14px">Horses</div>
+                <div style="display:flex;flex-direction:column;gap:11px">
+                  <sc-for list="{{ bp.horses }}" as="h" hint-placeholder-count="2">
+                    <div onClick="{{ h.onClick }}" style="display:flex;align-items:center;gap:14px;padding:11px 13px;border:1px solid #EFE6D0;border-radius:13px;cursor:pointer" style-hover="background:#FBF6EC">
+                      <div style="width:48px;height:48px;border-radius:11px;background:{{ h.photoBg }};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:20px;color:rgba(255,255,255,.4)"><sc-if value="{{ h.noPhoto }}" hint-placeholder-val="{{ true }}"><span>{{ h.initial }}</span></sc-if></div>
+                      <div style="flex:1"><div style="font-size:16px;font-weight:600;color:#23201C">{{ h.name }}</div><div style="font-size:12.5px;color:#8A8170">{{ h.breed }} · {{ h.board }}</div></div>
+                      <span style="font-size:12.5px;font-weight:600;color:#7c7363;background:#F1EADA;padding:5px 11px;border-radius:20px">{{ h.stall }}</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c2b79d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== FEEDING BOARD ===== -->
+      <sc-if value="{{ isFeeding }}" hint-placeholder-val="">
+        <div style="max-width:1180px;margin:0 auto">
+          <div style="display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap">
+            <div style="background:#fff;border:1px solid #E8DFCC;border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:13px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+              <div style="width:38px;height:38px;border-radius:10px;background:#FBF0D8;display:flex;align-items:center;justify-content:center;font-size:19px">☀</div>
+              <div><div style="font-size:12px;color:#8A8170">AM round</div><div style="font-family:'Spectral',serif;font-size:20px;font-weight:600;color:#23201C">{{ amCount }} / {{ feedTotal }} fed</div></div>
+            </div>
+            <div style="background:#fff;border:1px solid #E8DFCC;border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:13px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+              <div style="width:38px;height:38px;border-radius:10px;background:#E5F0E7;display:flex;align-items:center;justify-content:center;font-size:18px">☾</div>
+              <div><div style="font-size:12px;color:#8A8170">PM round</div><div style="font-family:'Spectral',serif;font-size:20px;font-weight:600;color:#23201C">{{ pmCount }} / {{ feedTotal }} fed</div></div>
+            </div>
+            <div style="flex:1"></div>
+            <button style="align-self:center;display:flex;align-items:center;gap:7px;background:#FBF6EC;border:1px solid #E4D9C0;color:#5a5345;font-size:13px;font-weight:600;padding:11px 16px;border-radius:11px;cursor:pointer;font-family:'Hanken Grotesk'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5345" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V4h12v5"/><path d="M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg> Print feed chart
+            </button>
+          </div>
+          <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+            <div style="display:grid;grid-template-columns:46px 1.6fr 2fr 2fr 1.4fr 46px;gap:14px;padding:13px 20px;background:#FBF6EC;border-bottom:1px solid #EFE6D0;font-size:11px;font-weight:700;color:#9a9081;text-transform:uppercase;letter-spacing:.6px;align-items:center">
+              <div>AM</div><div>Horse</div><div>Morning</div><div>Evening</div><div>Supplements</div><div style="text-align:center">PM</div>
+            </div>
+            <sc-for list="{{ feedRows }}" as="f" hint-placeholder-count="10">
+              <div style="display:grid;grid-template-columns:46px 1.6fr 2fr 2fr 1.4fr 46px;gap:14px;padding:13px 20px;border-bottom:1px solid #F4EEDE;align-items:center">
+                <div onClick="{{ f.toggleAm }}" style="{{ f.amStyle }}">
+                  <sc-if value="{{ f.amDone }}" hint-placeholder-val=""><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></sc-if>
+                </div>
+                <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                  <div style="width:34px;height:34px;border-radius:9px;background:{{ f.coat }};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:14px;color:rgba(255,255,255,.45)">{{ f.initial }}</div>
+                  <div style="min-width:0"><div style="font-size:14.5px;font-weight:600;color:#2f2a23">{{ f.name }}</div><div style="font-size:11.5px;color:#9a9081">{{ f.stall }}</div></div>
+                </div>
+                <div style="font-size:13px;color:#5a5345;line-height:1.4">{{ f.am }}</div>
+                <div style="font-size:13px;color:#5a5345;line-height:1.4">{{ f.pm }}</div>
+                <div style="font-size:12.5px;color:#7c7363">{{ f.supp }}</div>
+                <div onClick="{{ f.togglePm }}" style="{{ f.pmStyle }};margin:0 auto">
+                  <sc-if value="{{ f.pmDone }}" hint-placeholder-val=""><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== DAILY TASKS ===== -->
+      <sc-if value="{{ isTasks }}" hint-placeholder-val="">
+        <div style="max-width:860px;margin:0 auto">
+          <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 22px 6px">
+              <div><div style="font-family:'Spectral',serif;font-size:20px;font-weight:600;color:#23201C">Today · Thursday, June 11</div><div style="font-size:13px;color:#8A8170;margin-top:2px">{{ tasksDoneCount }} of {{ tasksTotal }} complete</div></div>
+              <div style="font-family:'Spectral',serif;font-size:34px;font-weight:600;color:#3C7A57">{{ taskPct }}</div>
+            </div>
+            <div style="padding:8px 22px 6px"><div style="height:8px;background:#EDE5D2;border-radius:6px;overflow:hidden"><div style="height:100%;width:{{ taskPct }};background:linear-gradient(90deg,#3C7A57,#5a9b71);border-radius:6px;transition:width .3s"></div></div></div>
+            <div style="padding:10px 14px 16px">
+              <sc-for list="{{ fullTasks }}" as="t" hint-placeholder-count="8">
+                <div onClick="{{ t.onToggle }}" style="display:flex;align-items:center;gap:15px;padding:13px 10px;border-radius:13px;cursor:pointer;border-bottom:1px solid #F4EEDE" style-hover="background:#FAF6EC">
+                  <div style="{{ t.checkStyle }}">
+                    <sc-if value="{{ t.done }}" hint-placeholder-val=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></sc-if>
+                  </div>
+                  <div style="width:56px;flex-shrink:0;font-size:12.5px;font-weight:700;color:#7c7363">{{ t.time }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="{{ t.titleStyle }}">{{ t.title }}</div>
+                    <div style="display:flex;align-items:center;gap:7px;margin-top:3px"><span style="width:7px;height:7px;border-radius:50%;background:{{ t.areaDot }}"></span><span style="font-size:12px;color:#9a9081">{{ t.area }}</span></div>
+                  </div>
+                  <div title="{{ t.assignee }}" style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:12.5px;color:#7c7363;font-weight:500">{{ t.assignee }}</span>
+                    <div style="width:30px;height:30px;border-radius:50%;background:{{ t.assigneeColor }};color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ t.assigneeInitials }}</div>
+                  </div>
+                </div>
+              </sc-for>
+              <button style="display:flex;align-items:center;gap:8px;width:100%;justify-content:center;margin-top:12px;background:#FBF6EC;border:1px dashed #d8c9a6;color:#7c7363;font-size:13.5px;font-weight:600;padding:13px;border-radius:12px;cursor:pointer;font-family:'Hanken Grotesk'" style-hover="background:#F6EFDF">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9c7026" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Add a task
+              </button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== MEDICAL RECORDS ===== -->
+      <sc-if value="{{ isMedical }}" hint-placeholder-val="">
+        <div style="max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px">
+
+          <!-- coming due -->
+          <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+            <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#B4502E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <div style="font-family:'Spectral',serif;font-size:19px;font-weight:600;color:#23201C;flex:1">Coming due</div>
+              <span style="background:#FBEAE2;color:#B4502E;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px">{{ medDueCount }} items</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px">
+              <sc-for list="{{ medDue }}" as="d" hint-placeholder-count="4">
+                <div onClick="{{ d.onClick }}" style="display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #EFE6D0;border-radius:13px;cursor:pointer" style-hover="background:#FBF6EC">
+                  <div style="width:40px;height:40px;border-radius:10px;background:{{ d.coat }};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:16px;color:rgba(255,255,255,.45)">{{ d.initial }}</div>
+                  <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:#2f2a23">{{ d.horse }}</div><div style="font-size:12px;color:#8A8170">{{ d.type }} · {{ d.when }}</div></div>
+                  <span style="{{ d.tagStyle }}">{{ d.sLabel }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start">
+            <!-- vax matrix -->
+            <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+              <div style="font-family:'Spectral',serif;font-size:18px;font-weight:600;color:#23201C;padding:18px 20px 12px">Vaccination status</div>
+              <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:8px;padding:10px 20px;background:#FBF6EC;border-top:1px solid #EFE6D0;border-bottom:1px solid #EFE6D0;font-size:10.5px;font-weight:700;color:#9a9081;text-transform:uppercase;letter-spacing:.4px">
+                <div>Horse</div><div style="text-align:center">Coggins</div><div style="text-align:center">EWT/WNV</div><div style="text-align:center">Rabies</div><div style="text-align:center">Flu/Rhino</div>
+              </div>
+              <sc-for list="{{ vaxMatrix }}" as="m" hint-placeholder-count="8">
+                <div onClick="{{ m.onClick }}" style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:8px;padding:11px 20px;border-bottom:1px solid #F4EEDE;align-items:center;cursor:pointer" style-hover="background:#FAF6EC">
+                  <div style="display:flex;align-items:center;gap:10px;min-width:0">
+                    <div style="width:28px;height:28px;border-radius:8px;background:{{ m.coat }};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:12px;color:rgba(255,255,255,.5)">{{ m.initial }}</div>
+                    <span style="font-size:13.5px;font-weight:600;color:#2f2a23">{{ m.name }}</span>
+                  </div>
+                  <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="4">
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+                      <span style="width:9px;height:9px;border-radius:50%;background:{{ c.dot }}"></span>
+                      <span style="font-size:10.5px;color:#9a9081">{{ c.d }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+
+            <!-- vet notes -->
+            <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+              <div style="font-family:'Spectral',serif;font-size:18px;font-weight:600;color:#23201C;margin-bottom:15px">Recent vet activity</div>
+              <sc-for list="{{ medNotes }}" as="n" hint-placeholder-count="5">
+                <div onClick="{{ n.onClick }}" style="display:flex;gap:12px;padding-bottom:15px;cursor:pointer">
+                  <div style="width:34px;height:34px;border-radius:9px;background:{{ n.coat }};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:13px;color:rgba(255,255,255,.5)">{{ n.initial }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13.5px;font-weight:700;color:#2f2a23">{{ n.horse }}</span><span style="font-size:11px;color:#9a9081">· {{ n.date }}</span></div>
+                    <div style="font-size:12px;font-weight:600;color:#9c7026;margin:2px 0 3px">{{ n.type }}</div>
+                    <div style="font-size:12.5px;color:#6a6253;line-height:1.45">{{ n.note }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== ARENA CALENDAR ===== -->
+      <sc-if value="{{ isCalendar }}" hint-placeholder-val="">
+        <div style="max-width:1240px;margin:0 auto">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #E4D9C0;border-radius:11px;padding:5px">
+              <button style="width:32px;height:32px;border:none;background:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:#F6EFDF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5a5345" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+              <div style="font-family:'Spectral',serif;font-size:15.5px;font-weight:600;color:#23201C;padding:0 8px">Thu, June 11</div>
+              <button style="width:32px;height:32px;border:none;background:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:#F6EFDF"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5a5345" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+            </div>
+            <div style="display:flex;background:#fff;border:1px solid #E4D9C0;border-radius:10px;padding:3px">
+              <span style="font-size:12.5px;font-weight:600;color:#fff;background:#1C3A2E;padding:6px 14px;border-radius:8px">Day</span>
+              <span style="font-size:12.5px;font-weight:600;color:#7c7363;padding:6px 14px">Week</span>
+              <span style="font-size:12.5px;font-weight:600;color:#7c7363;padding:6px 14px">Month</span>
+            </div>
+            <div style="flex:1"></div>
+            <button onClick="{{ goBookArena }}" style="display:flex;align-items:center;gap:7px;background:#1C3A2E;color:#F1EBDB;border:none;border-radius:11px;padding:10px 16px;font-family:'Hanken Grotesk';font-size:13px;font-weight:600;cursor:pointer" style-hover="background:#234738">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F1EBDB" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Book arena
+            </button>
+          </div>
+
+          <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+            <!-- arena headers -->
+            <div style="display:grid;grid-template-columns:62px 1fr 1fr 1fr;border-bottom:1px solid #EFE6D0">
+              <div style="background:#FBF6EC"></div>
+              <div style="padding:14px;text-align:center;border-left:1px solid #F0E9D8;background:#FBF6EC"><div style="font-size:14px;font-weight:700;color:#23201C">Covered Arena</div><div style="font-size:11px;color:#9a9081">Indoor · 80×200</div></div>
+              <div style="padding:14px;text-align:center;border-left:1px solid #F0E9D8;background:#FBF6EC"><div style="font-size:14px;font-weight:700;color:#23201C">Outdoor Arena</div><div style="font-size:11px;color:#9a9081">Sand · 100×220</div></div>
+              <div style="padding:14px;text-align:center;border-left:1px solid #F0E9D8;background:#FBF6EC"><div style="font-size:14px;font-weight:700;color:#23201C">Round Pen</div><div style="font-size:11px;color:#9a9081">60ft</div></div>
+            </div>
+            <!-- timeline body -->
+            <div style="display:grid;grid-template-columns:62px 1fr 1fr 1fr;position:relative">
+              <!-- hour gutter -->
+              <div style="position:relative;height:{{ calHeight }}px;background:#FBF6EC">
+                <sc-for list="{{ hourRows }}" as="hr" hint-placeholder-count="15">
+                  <div style="position:absolute;top:{{ hr.top }}px;right:8px;font-size:11px;font-weight:600;color:#a9a08f;transform:translateY(-7px)">{{ hr.label }}</div>
+                </sc-for>
+              </div>
+              <!-- arena columns -->
+              <sc-for list="{{ calArenas }}" as="col" hint-placeholder-count="3">
+                <div style="position:relative;height:{{ calHeight }}px;border-left:1px solid #F0E9D8;background:repeating-linear-gradient(180deg,transparent 0,transparent 57px,#F4EEDE 57px,#F4EEDE 58px)">
+                  <sc-for list="{{ col.events }}" as="e" hint-placeholder-count="2">
+                    <div onClick="{{ e.onEdit }}" style="{{ e.style }}" style-hover="box-shadow:0 6px 16px rgba(40,30,15,.16)">
+                      <div style="font-size:10.5px;font-weight:700;color:#7c7363">{{ e.timeLabel }}</div>
+                      <div style="font-size:13px;font-weight:600;color:#2f2a23;line-height:1.25;margin-top:2px">{{ e.title }}</div>
+                      <div style="font-size:11px;color:#9a9081;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.who }}</div>
+                      <button onClick="{{ e.onDelete }}" style="position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:5px;border:none;background:rgba(0,0,0,.08);color:#5a5345;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;padding:0" style-hover="background:rgba(180,80,46,.15);color:#B4502E">×</button>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== MESSAGES ===== -->
+      <sc-if value="{{ isMessages }}" hint-placeholder-val="">
+        <div style="max-width:1180px;margin:0 auto">
+          <div style="display:grid;grid-template-columns:340px 1fr;gap:18px;height:calc(100vh - 70px - 82px);min-height:520px">
+            <!-- thread list -->
+            <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+              <div style="padding:16px 16px 10px"><div style="display:flex;align-items:center;gap:9px;background:#FBF6EC;border:1px solid #EFE6D0;border-radius:11px;padding:9px 12px;color:#9a9081"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg><span style="font-size:13px">Search messages</span></div></div>
+              <div style="flex:1;overflow-y:auto;padding:0 8px 8px">
+                <sc-for list="{{ threadCards }}" as="t" hint-placeholder-count="5">
+                  <div onClick="{{ t.onClick }}" style="{{ t.rowStyle }}" style-hover="background:#F6EFDF">
+                    <div style="width:42px;height:42px;border-radius:50%;background:{{ t.color }};color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ t.initials }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;gap:6px"><span style="font-size:14px;font-weight:600;color:#2f2a23;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</span><span style="font-size:11px;color:#a9a08f">{{ t.time }}</span></div>
+                      <div style="font-size:11px;color:#9c7026;font-weight:600;margin:1px 0 2px">{{ t.role }}</div>
+                      <div style="font-size:12.5px;color:#8A8170;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.snippet }}</div>
+                    </div>
+                    <sc-if value="{{ t.unread }}" hint-placeholder-val=""><span style="width:9px;height:9px;background:#3C7A57;border-radius:50%;flex-shrink:0;margin-top:6px"></span></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <!-- conversation -->
+            <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+              <div style="display:flex;align-items:center;gap:12px;padding:15px 20px;border-bottom:1px solid #F0E9D8">
+                <div style="width:42px;height:42px;border-radius:50%;background:{{ activeThread.color }};color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center">{{ activeThread.initials }}</div>
+                <div style="flex:1"><div style="font-size:16px;font-weight:600;color:#23201C">{{ activeThread.name }}</div><div style="font-size:12px;color:#9c7026;font-weight:600">{{ activeThread.role }}</div></div>
+                <button style="width:38px;height:38px;border-radius:10px;border:1px solid #E4D9C0;background:#FBF6EC;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5a5345" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/></svg></button>
+              </div>
+              <div style="flex:1;overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:14px;background:#FCFAF4">
+                <div style="text-align:center;font-size:11.5px;color:#a9a08f;margin-bottom:2px">Today</div>
+                <sc-for list="{{ activeThread.msgs }}" as="m" hint-placeholder-count="3">
+                  <div style="{{ m.rowStyle }}">
+                    <div>
+                      <div style="{{ m.bubbleStyle }}">{{ m.x }}</div>
+                      <div style="{{ m.metaStyle }}">{{ m.t }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="padding:14px 18px;border-top:1px solid #F0E9D8;display:flex;align-items:center;gap:11px">
+                <div style="flex:1;background:#FBF6EC;border:1px solid #EFE6D0;border-radius:13px;padding:12px 16px;color:#9a9081;font-size:13.5px">Write a message…</div>
+                <button style="width:44px;height:44px;border-radius:12px;background:#1C3A2E;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F1EBDB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== FACILITY MAP ===== -->
+      <sc-if value="{{ isFacility }}" hint-placeholder-val="">
+        <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:18px">
+
+          <!-- aerial -->
+          <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+            <div style="display:flex;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid #F0E9D8;flex-wrap:wrap">
+              <div style="font-family:'Spectral',serif;font-size:18px;font-weight:600;color:#23201C;flex:1">The Winners Stable · property layout</div>
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#7c7363;font-weight:600"><span style="width:11px;height:11px;border-radius:3px;background:#C99A4A"></span>Paddocks 1–15</div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#7c7363;font-weight:600"><span style="width:11px;height:11px;border-radius:3px;background:#2A2521"></span>Stalls 1–8</div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#7c7363;font-weight:600"><span style="width:11px;height:11px;border-radius:3px;background:#B4502E"></span>Round Pens 1–2</div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#7c7363;font-weight:600"><span style="width:11px;height:11px;border-radius:3px;background:#3C7A57"></span>Entry gates</div>
+              </div>
+            </div>
+            <div style="background:#dcd6c6"><img src="assets/facility-map.png" alt="Aerial map of The Winners Stable" style="width:100%;display:block"></div>
+            <div style="display:flex;gap:16px;padding:13px 20px;flex-wrap:wrap;font-size:12.5px;color:#7c7363">
+              <span><strong style="color:#3a342b">West end</strong> · paddocks 1–13, boarder shed</span>
+              <span><strong style="color:#3a342b">Barn &amp; arena</strong> · 8 stalls, covered &amp; open arena, 2 round pens, tack &amp; hay rooms</span>
+              <span><strong style="color:#3a342b">North</strong> · cattle pasture above the round pens</span>
+              <span><strong style="color:#3a342b">East end</strong> · paddocks 14–15</span>
+            </div>
+          </div>
+
+          <!-- occupancy -->
+          <div style="display:grid;grid-template-columns:1fr 1.55fr;gap:18px;align-items:start">
+            <!-- stalls -->
+            <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+              <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">
+                <span style="width:11px;height:11px;border-radius:3px;background:#2A2521"></span>
+                <div style="font-family:'Spectral',serif;font-size:17px;font-weight:600;color:#23201C;flex:1">Barn stalls</div>
+                <span style="font-size:11.5px;font-weight:700;color:#3C7A57;background:#E5F0E7;padding:3px 10px;border-radius:20px">{{ facStallsFilled }} / 8</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+                <sc-for list="{{ facStalls }}" as="s" hint-placeholder-count="8">
+                  <div onClick="{{ s.onClick }}" style="{{ s.style }}" style-hover="border-color:#cdbf9f">
+                    <div style="width:30px;height:30px;border-radius:8px;background:{{ s.photoBg }};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:13px;color:rgba(255,255,255,.55)"><sc-if value="{{ s.occupied }}" hint-placeholder-val="{{ true }}"><span>{{ s.initial }}</span></sc-if></div>
+                    <div style="min-width:0"><div style="font-size:10px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px">Stall {{ s.label }}</div><div style="{{ s.nameStyle }}">{{ s.name }}</div></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:16px;display:flex;gap:9px">
+                <div style="flex:1;background:#FBF6EC;border:1px solid #EFE6D0;border-radius:11px;padding:11px 13px"><div style="display:flex;align-items:center;gap:7px;font-size:10px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px"><span style="width:8px;height:8px;border-radius:50%;background:#B4502E"></span>Round Pen 1</div><div style="font-size:12.5px;font-weight:600;color:#5a5345;margin-top:3px">Training</div></div>
+                <div style="flex:1;background:#FBF6EC;border:1px solid #EFE6D0;border-radius:11px;padding:11px 13px"><div style="display:flex;align-items:center;gap:7px;font-size:10px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px"><span style="width:8px;height:8px;border-radius:50%;background:#B4502E"></span>Round Pen 2</div><div style="font-size:12.5px;font-weight:600;color:#5a5345;margin-top:3px">Training</div></div>
+              </div>
+              <div style="margin-top:9px;background:#F2F5EE;border:1px solid #DDE7D5;border-radius:11px;padding:11px 13px;display:flex;align-items:center;gap:9px">
+                <span style="font-size:17px">🐄</span>
+                <div><div style="font-size:13px;font-weight:600;color:#2f2a23">Cattle pasture</div><div style="font-size:11.5px;color:#8A8170">North of the round pens</div></div>
+              </div>
+            </div>
+
+            <!-- paddocks -->
+            <div style="background:#fff;border:1px solid #E8DFCC;border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px rgba(40,30,15,.04)">
+              <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
+                <span style="width:11px;height:11px;border-radius:3px;background:#C99A4A"></span>
+                <div style="font-family:'Spectral',serif;font-size:17px;font-weight:600;color:#23201C;flex:1">Paddocks</div>
+                <span style="font-size:11.5px;font-weight:700;color:#3C7A57;background:#E5F0E7;padding:3px 10px;border-radius:20px">{{ facPaddocksFilled }} / 15</span>
+              </div>
+              <div style="font-size:11px;color:#9a9081;text-transform:uppercase;letter-spacing:.6px;margin:12px 0 8px">West end · 1–13</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px">
+                <sc-for list="{{ facWest }}" as="s" hint-placeholder-count="13">
+                  <div onClick="{{ s.onClick }}" style="{{ s.style }}" style-hover="border-color:#cdbf9f">
+                    <div style="width:30px;height:30px;border-radius:8px;background:{{ s.photoBg }};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:13px;color:rgba(255,255,255,.55)"><sc-if value="{{ s.occupied }}" hint-placeholder-val="{{ true }}"><span>{{ s.initial }}</span></sc-if></div>
+                    <div style="min-width:0"><div style="font-size:10px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px">Paddock {{ s.label }}</div><div style="{{ s.nameStyle }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</div></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-size:11px;color:#9a9081;text-transform:uppercase;letter-spacing:.6px;margin:16px 0 8px">East end · 14–15</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px">
+                <sc-for list="{{ facEast }}" as="s" hint-placeholder-count="2">
+                  <div onClick="{{ s.onClick }}" style="{{ s.style }}" style-hover="border-color:#cdbf9f">
+                    <div style="width:30px;height:30px;border-radius:8px;background:{{ s.photoBg }};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Spectral',serif;font-size:13px;color:rgba(255,255,255,.55)"><sc-if value="{{ s.occupied }}" hint-placeholder-val="{{ true }}"><span>{{ s.initial }}</span></sc-if></div>
+                    <div style="min-width:0"><div style="font-size:10px;color:#9a9081;text-transform:uppercase;letter-spacing:.5px">Paddock {{ s.label }}</div><div style="{{ s.nameStyle }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</div></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <div id="screen-mount"></div>
+
+    </main>
+  </div>
+</div>
+{{ calEditPanel }}
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'dashboard',
+    role: 'Manager',
+    selectedHorse: 'h1',
+    selectedBoarder: 'b1',
+    activeThread: 't1',
+    tasks: [
+      { id:'k1', title:'Morning feed — AM round', area:'Barn', time:'6:00 AM', assignee:'Laine', done:true },
+      { id:'k2', title:'Turn out paddock horses', area:'Paddocks', time:'7:00 AM', assignee:'Laine', done:true },
+      { id:'k3', title:'Muck stalls 1–8', area:'Barn', time:'7:30 AM', assignee:'Laine', done:true },
+      { id:'k4', title:'Refill & scrub water troughs', area:'All areas', time:'10:00 AM', assignee:'Laine', done:false },
+      { id:'k5', title:'Arena drag + setup', area:'Covered Arena', time:'11:30 AM', assignee:'Laine', done:false },
+      { id:'k6', title:'Check feed supplies', area:'Hay room', time:'1:00 PM', assignee:'Laine', done:false },
+      { id:'k7', title:'Evening feed — PM round', area:'Barn', time:'5:00 PM', assignee:'Stoney', done:false },
+      { id:'k8', title:'Bring horses in / check paddocks', area:'Paddocks', time:'6:00 PM', assignee:'Stoney', done:false },
+      { id:'k9', title:'Night check + stall lock-up', area:'Barn', time:'9:00 PM', assignee:'Stoney', done:false },
+    ],
+    feedDone: {},
+    editingBoarder: null,
+    boarderDraft: {},
+    boarderEdits: {},
+    editingHorse: null,
+    horseDraft: {},
+    horseEdits: {},
+    medEdit: null,
+    medDraft: {},
+    sidebarOpen: false,
+    winWidth: 1200,
+    calEvents: null,
+    calEdit: null,
+    calDraft: {},
+    taskEdit: null,
+    taskDraft: {},
+    msgDrafts: {},
+    photos: {},
+  };
+
+  // ---------- static data ----------
+  coatGrad(c){
+    const m = {
+      Bay:'linear-gradient(150deg,#6e4524,#39230f)',
+      Chestnut:'linear-gradient(150deg,#9d5527,#67311a)',
+      Sorrel:'linear-gradient(150deg,#a85f30,#79401e)',
+      Grey:'linear-gradient(150deg,#c7bfb1,#8e857a)',
+      Black:'linear-gradient(150deg,#3b332c,#181410)',
+      Palomino:'linear-gradient(150deg,#e2c07c,#bb8d40)',
+      Buckskin:'linear-gradient(150deg,#cfa563,#8c6c3a)',
+      Appaloosa:'linear-gradient(150deg,#b6ab9c,#766b5d)',
+      Paint:'linear-gradient(150deg,#8a5a3a 0%,#8a5a3a 45%,#e7e0d4 45%,#e7e0d4 100%)',
+    };
+    return m[c] || m.Bay;
+  }
+  personColor(name){
+    const palette=['#3C7A57','#9c7026','#7A4A2B','#5a6b8c','#a05a4a','#4a7a8c','#8c6a9c','#6a8c4a'];
+    let h=0; for(const ch of (name||'')) h=(h*31+ch.charCodeAt(0))>>>0;
+    return palette[h%palette.length];
+  }
+  initials(name){ return (name||'').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+  horsesData(){
+    const edits = (this.state && this.state.horseEdits) || {};
+    return [
+      // Paddock 1
+      { id:'h1', name:'Georgia', coat:'Bay', breed:'', sex:'', age:0, height:'', owner:'b1', stall:'Paddock W1', board:'Paddock board', arrived:'',
+        ration:{am:'½ pellets', pm:'½ pellets', supp:''},
+        vax:[], care:[], notes:[] },
+      // Paddock 3 — Sophie & Alvin
+      { id:'h2', name:'Sophie', coat:'Chestnut', breed:'', sex:'', age:0, height:'', owner:'b2', stall:'Paddock W3', board:'Paddock board', arrived:'',
+        ration:{am:'1 cup feed + 1 Smartpack', pm:'1 cup feed', supp:'Owner provided'},
+        vax:[], care:[], notes:[] },
+      { id:'h3', name:'Alvin', coat:'Sorrel', breed:'', sex:'', age:0, height:'', owner:'b2', stall:'Paddock W3', board:'Paddock board', arrived:'',
+        ration:{am:'80% cup feed', pm:'80% cup feed', supp:'Owner provided'},
+        vax:[], care:[], notes:[] },
+      // Paddock 4
+      { id:'h4', name:'Foxy', coat:'Palomino', breed:'', sex:'', age:0, height:'', owner:'b3', stall:'Paddock W4', board:'Paddock board', arrived:'',
+        ration:{am:'½ scoop Thrive DRY (Thrive left bin, Timothy right)', pm:'½ scoop Thrive DRY + ⅓ scoop Timothy Pellets SOAKED + ½ scoop magnesium + ½ scoop Apple Elean', supp:''},
+        vax:[], care:[], notes:[] },
+      // Paddock 6
+      { id:'h5', name:'Rio', coat:'Bay', breed:'', sex:'', age:0, height:'', owner:'b4', stall:'Paddock W6', board:'Paddock board', arrived:'',
+        ration:{am:'1½ scoops DRY', pm:'1 scoop DRY', supp:''},
+        vax:[], care:[], notes:[] },
+      // Paddock 7 — Pretzel & Amali
+      { id:'h6', name:'Pretzel', coat:'Grey', breed:'', sex:'', age:0, height:'', owner:'b5', stall:'Paddock W7', board:'Paddock board', arrived:'',
+        ration:{am:'1 scoop pellets (white bin) + 1 scoop balancer (white bin), wet', pm:'1 scoop pellets + 1.5 scoops copper (red bin), wet', supp:''},
+        vax:[], care:[], notes:[] },
+      { id:'h7', name:'Amali', coat:'Black', breed:'', sex:'', age:0, height:'', owner:'b5', stall:'Paddock W7', board:'Paddock board', arrived:'',
+        ration:{am:'1 scoop pellets (white bin) + 1 scoop balancer (white bin), wet', pm:'1 scoop pellets + 1.5 scoops copper (red bin), wet', supp:''},
+        vax:[], care:[], notes:[] },
+      // Paddock 8
+      { id:'h8', name:'Journey', coat:'Buckskin', breed:'', sex:'', age:0, height:'', owner:'b6', stall:'Paddock W8', board:'Paddock board', arrived:'',
+        ration:{am:'1 tub prepped grain (orange lid box) + 1 flake alfalfa', pm:'1 flake alfalfa', supp:'Owner provided'},
+        vax:[], care:[], notes:[] },
+      // Paddock 9
+      { id:'h9', name:'Santana', coat:'Chestnut', breed:'', sex:'', age:0, height:'', owner:'b7', stall:'Paddock W9', board:'Paddock board', arrived:'',
+        ration:{am:'½ cup Ration Balancer', pm:'½ cup Ration Balancer', supp:''},
+        vax:[], care:[], notes:[] },
+      // Paddock 10
+      { id:'h10', name:'Malibu', coat:'Palomino', breed:'', sex:'', age:0, height:'', owner:'b8', stall:'Paddock W10', board:'Paddock board', arrived:'',
+        ration:{am:'1 AM Bag Pre-Prepped + 1 Fluro Flexi-flex', pm:'1 PM Bag Pre-Prepped + Soaked Alfalfa', supp:'Owner provided'},
+        vax:[], care:[], notes:[] },
+      // Paddock 12 — Lena & Whiskey
+      { id:'h11', name:'Lena', coat:'Bay', breed:'', sex:'', age:0, height:'', owner:'b9', stall:'Paddock W12', board:'Paddock board', arrived:'',
+        ration:{am:'See barn feed room', pm:'See barn feed room', supp:''},
+        vax:[], care:[], notes:[] },
+      { id:'h12', name:'Whiskey', coat:'Sorrel', breed:'', sex:'', age:0, height:'', owner:'b9', stall:'Paddock W12', board:'Paddock board', arrived:'',
+        ration:{am:'See barn feed room', pm:'See barn feed room', supp:''},
+        vax:[], care:[], notes:[] },
+      // Stall horses (from barn board)
+      { id:'h13', name:'Jig',     coat:'Bay',      breed:'', sex:'', age:0, height:'', owner:'b9',  stall:'Stall 1', board:'Stall board', arrived:'', ration:{am:'', pm:'', supp:''}, vax:[], care:[], notes:[] },
+      { id:'h14', name:'Diamond', coat:'Chestnut', breed:'', sex:'', age:0, height:'', owner:'b10', stall:'Stall 3', board:'Stall board', arrived:'', ration:{am:'', pm:'', supp:''}, vax:[], care:[], notes:[] },
+      { id:'h15', name:'Rohze',   coat:'Bay',      breed:'', sex:'', age:0, height:'', owner:'b9',  stall:'Stall 4', board:'Stall board', arrived:'', ration:{am:'', pm:'', supp:''}, vax:[], care:[], notes:[] },
+      { id:'h16', name:'Tess',    coat:'Sorrel',   breed:'', sex:'', age:0, height:'', owner:'b9',  stall:'Stall 5', board:'Stall board', arrived:'', ration:{am:'', pm:'', supp:''}, vax:[], care:[], notes:[] },
+      { id:'h17', name:'Remy',    coat:'Grey',     breed:'', sex:'', age:0, height:'', owner:'',    stall:'Stall 7', board:'Stall board', arrived:'', ration:{am:'', pm:'', supp:''}, vax:[], care:[], notes:[] },
+      { id:'h18', name:'Ruby',    coat:'Palomino', breed:'', sex:'', age:0, height:'', owner:'b10', stall:'Stall 8', board:'Stall board', arrived:'', ration:{am:'', pm:'', supp:''}, vax:[], care:[], notes:[] },
+    ].map(h=>{ const e=edits[h.id]; if(!e) return h; const {ration:er,...eb}=e; return {...h,...eb,ration:{...h.ration,...(er||{})}}; });
+  }
+  boardersData(){
+    const edits = (this.state && this.state.boarderEdits) || {};
+    return [
+      { id:'b1', name:'Emily',          phone:'',             email:'', since:'', balance:0, horses:['h1'] },
+      { id:'b2', name:'Christy',         phone:'512-767-8019', email:'', since:'', balance:0, horses:['h2','h3'] },
+      { id:'b3', name:'Stephanie',       phone:'512-468-3002', email:'', since:'', balance:0, horses:['h4'] },
+      { id:'b4', name:'Laine',           phone:'512-567-3022', email:'', since:'', balance:0, horses:['h5'] },
+      { id:'b5', name:'Laurel',          phone:'214-901-8764', email:'', since:'', balance:0, horses:['h6','h7'] },
+      { id:'b6', name:'Maddie',          phone:'971-228-9916', email:'', since:'', balance:0, horses:['h8'] },
+      { id:'b7', name:'Mani',            phone:'254-624-0966', email:'', since:'', balance:0, horses:['h9'] },
+      { id:'b8', name:'Bri',             phone:'512-796-1931', email:'', since:'', balance:0, horses:['h10'] },
+      { id:'b9',  name:'Chris & Eileen', phone:'512-585-4092', email:'', since:'', balance:0, horses:['h11','h12','h13','h15','h16'] },
+      { id:'b10', name:'Charlie',         phone:'512-549-0051', email:'', since:'', balance:0, horses:['h14','h18'] },
+    ].map(b => edits[b.id] ? {...b, ...edits[b.id]} : b);
+  }
+  eventsData(){
+    // hours in 24h decimal; arena color
+    return [
+      { id:'e1', s:7,   e:8,    title:'Private lesson — Maverick', who:'Sam Okafor · Tom Bradley', arena:'Arena', color:'#3C7A57', type:'Lesson' },
+      { id:'e2', s:8,   e:9,    title:'Boarder ride', who:'Marisol Vega · Reno', arena:'Arena', color:'#9c7026', type:'Open ride' },
+      { id:'e3', s:9,   e:10.5, title:'Groundwork session', who:'Angela Crews · Shadow', arena:'Round Pen 1', color:'#7A4A2B', type:'Groundwork' },
+      { id:'e4', s:10,  e:11,   title:'Kids lesson — Daisy', who:'Sam Okafor', arena:'Arena', color:'#3C7A57', type:'Lesson' },
+      { id:'e5', s:9.5, e:10.5, title:'Colt starting — Juniper', who:'Sam Okafor', arena:'Round Pen 2', color:'#7A4A2B', type:'Groundwork' },
+      { id:'e6', s:12,  e:13,   title:'Farrier — 4 horses', who:'Cody (farrier)', arena:'Arena', color:'#B4502E', type:'Blocked' },
+      { id:'e7', s:14,  e:15.5, title:'Training ride — Diesel', who:'Sam Okafor · Derek Lin', arena:'Arena', color:'#3C7A57', type:'Training' },
+      { id:'e8', s:15,  e:16,   title:'Lunging — Willow', who:'Jenna Cole', arena:'Round Pen 1', color:'#9c7026', type:'Groundwork' },
+      { id:'e9', s:16.5,e:18,   title:'Group lesson (3 riders)', who:'Sam Okafor', arena:'Arena', color:'#3C7A57', type:'Lesson' },
+      { id:'e10',s:18,  e:19,   title:'Open ride — boarders', who:'Open to all boarders', arena:'Arena', color:'#5a6b8c', type:'Open ride' },
+    ];
+  }
+  threadsData(){
+    return [
+      { id:'t1', name:'Marisol Vega', role:'Boarder', color:this.personColor('Marisol Vega'), unread:true, time:'9:12 AM',
+        snippet:'Could we move Reno’s Thursday lesson to 4pm? Work ran late this week.',
+        msgs:[{me:false,t:'8:58 AM',x:'Morning! Hope all is well at the barn 🐴'},{me:false,t:'9:12 AM',x:'Could we move Reno’s Thursday lesson to 4pm? Work ran late this week.'},{me:true,t:'9:20 AM',x:'Morning Marisol! 4pm in the Covered Arena works — I’ll update the calendar.'}] },
+      { id:'t2', name:'Luis Romero', role:'Head Groom', color:this.personColor('Luis Romero'), unread:true, time:'8:40 AM',
+        snippet:'Heads up — the trough in Barn B is leaking again, shut the valve for now.',
+        msgs:[{me:false,t:'8:40 AM',x:'Heads up — the trough in Barn B is leaking again, shut the valve for now.'},{me:true,t:'8:45 AM',x:'Thanks Luis. I’ll add it to today’s tasks and call the plumber.'}] },
+      { id:'t3', name:'Barn Staff', role:'Group · 4', color:'#1C3A2E', unread:false, time:'Yesterday',
+        snippet:'Sam: Arena drag done, footing is great for lessons today.',
+        msgs:[{me:false,t:'7:30 AM',x:'Becca: Stalls 1–6 mucked, geldings turned out.'},{me:false,t:'7:55 AM',x:'Sam: Arena drag done, footing is great for lessons today.'},{me:true,t:'8:05 AM',x:'Perfect, thanks team. Rain expected tonight — blanket list is on the board.'}] },
+      { id:'t4', name:'Priya Nair', role:'Boarder', color:this.personColor('Priya Nair'), unread:false, time:'Yesterday',
+        snippet:'When is Pearl due for her Coggins? Want to schedule a show next month.',
+        msgs:[{me:false,t:'4:10 PM',x:'When is Pearl due for her Coggins? Want to schedule a show next month.'},{me:true,t:'4:30 PM',x:'Pearl’s Coggins is due Jun 15 — Dr. Alvarez is out next Tuesday, I’ll add her.'},{me:false,t:'4:32 PM',x:'Perfect, thank you!'}] },
+      { id:'t5', name:'Sam Okafor', role:'Trainer', color:this.personColor('Sam Okafor'), unread:false, time:'Mon',
+        snippet:'Can I book the Covered Arena Fri 2–4pm for the clinic prep?',
+        msgs:[{me:false,t:'Mon 3:00 PM',x:'Can I book the Covered Arena Fri 2–4pm for the clinic prep?'},{me:true,t:'Mon 3:15 PM',x:'Booked it — blocked the outdoor as backup too.'}] },
+    ];
+  }
+
+  // ---------- photos (image-slot sidecar) ----------
+  componentDidMount(){
+    this.loadPhotos();
+    this._photoTimer = setInterval(()=>this.loadPhotos(), 2500);
+    try{ const s=localStorage.getItem('ws-boarder-edits'); if(s) this.setState({boarderEdits:JSON.parse(s)}); }catch(e){}
+    try{ const s=localStorage.getItem('ws-horse-edits'); if(s) this.setState({horseEdits:JSON.parse(s)}); }catch(e){}
+    try{ const s=localStorage.getItem('ws-cal-events'); if(s) this.setState({calEvents:JSON.parse(s)}); else this.setState({calEvents:this.eventsData()}); }catch(e){ this.setState({calEvents:this.eventsData()}); }
+    try{ const s=localStorage.getItem('ws-tasks'); if(s) this.setState({tasks:JSON.parse(s)}); }catch(e){}
+    this.setState({winWidth:window.innerWidth});
+    this._onResize = () => this.setState({winWidth:window.innerWidth});
+    window.addEventListener('resize', this._onResize);
+  }
+  componentWillUnmount(){
+    if(this._photoTimer) clearInterval(this._photoTimer);
+    if(this._onResize) window.removeEventListener('resize', this._onResize);
+  }
+
+  loadPhotos(){
+    fetch('.image-slots.state.json').then(r=>r.ok?r.json():null).then(j=>{
+      if(!j||typeof j!=='object') return;
+      const p={};
+      for(const k in j){ const v=j[k]; const u=(typeof v==='string')?v:(v&&v.u); if(u&&/^data:image\//.test(u)) p[k]=u; }
+      const cur=JSON.stringify(this.state.photos||{});
+      if(JSON.stringify(p)!==cur) this.setState({ photos:p });
+    }).catch(()=>{});
+  }
+
+  // ---------- handlers ----------
+  go(v){ this.setState({ view:v }); this.loadPhotos(); const m=document.querySelector('main'); if(m) m.scrollTop=0; }
+  setRole(r){ this.setState({ role:r, view:'dashboard' }); }
+  toggleTask(id){ this.setState(s=>({ tasks:s.tasks.map(t=>t.id===id?{...t,done:!t.done}:t) }), ()=>{ try{localStorage.setItem('ws-tasks',JSON.stringify(this.state.tasks));}catch(e){} }); }
+  toggleFeed(id){ this.setState(s=>({ feedDone:{...s.feedDone,[id]:!s.feedDone[id]} })); }
+  openHorse(id){ this.setState({ view:'horse', selectedHorse:id, medEdit:null, medDraft:{} }); this.loadPhotos(); const m=document.querySelector('main'); if(m) m.scrollTop=0; }
+  openBoarder(id){ this.setState({ view:'boarderProfile', selectedBoarder:id }); this.loadPhotos(); const m=document.querySelector('main'); if(m) m.scrollTop=0; }
+  openThread(id){ this.setState({ view:'messages', activeThread:id }); }
+  startEditBoarder(id){
+    const b = this.boardersData().find(x=>x.id===id) || {};
+    this.setState({ editingBoarder:id, boarderDraft:{name:b.name||'', phone:b.phone||'', email:b.email||'', since:b.since||''} });
+  }
+  saveBoarder(){
+    const id = this.state.editingBoarder;
+    const draft = this.state.boarderDraft;
+    const edits = {...(this.state.boarderEdits||{}), [id]:{...((this.state.boarderEdits||{})[id]||{}), ...draft}};
+    this.setState({ boarderEdits:edits, editingBoarder:null, boarderDraft:{} });
+    try{ localStorage.setItem('ws-boarder-edits', JSON.stringify(edits)); }catch(e){}
+  }
+  cancelEditBoarder(){ this.setState({ editingBoarder:null, boarderDraft:{} }); }
+  updateDraft(field, val){ this.setState(s=>({boarderDraft:{...s.boarderDraft,[field]:val}})); }
+  startEditHorse(id){
+    const h=this.horsesData().find(x=>x.id===id)||{};
+    this.setState({editingHorse:id,horseDraft:{
+      breed:h.breed||'',sex:h.sex||'',age:h.age?String(h.age):'',height:h.height||'',
+      stall:h.stall||'',board:h.board||'',arrived:h.arrived||'',
+      am:(h.ration||{}).am||'',pm:(h.ration||{}).pm||'',supp:(h.ration||{}).supp||''
+    }});
+  }
+  saveHorse(){
+    const id=this.state.editingHorse;
+    const {am,pm,supp,...basic}=this.state.horseDraft;
+    const existing=(this.state.horseEdits||{})[id]||{};
+    const newEdit={...existing,...basic,ration:{...(existing.ration||{}),am,pm,supp}};
+    const horseEdits={...(this.state.horseEdits||{}),[id]:newEdit};
+    this.setState({horseEdits,editingHorse:null,horseDraft:{}});
+    try{localStorage.setItem('ws-horse-edits',JSON.stringify(horseEdits));}catch(e){}
+  }
+  cancelEditHorse(){ this.setState({editingHorse:null,horseDraft:{}}); }
+  updateHorseDraft(f,v){ this.setState(s=>({horseDraft:{...s.horseDraft,[f]:v}})); }
+  openTaskEdit(idx){
+    const t=idx===-1?{title:'',area:'Barn',time:'8:00 AM',assignee:'Laine',done:false}:{...this.state.tasks[idx]};
+    this.setState({taskEdit:{idx},taskDraft:t});
+  }
+  saveTask(){
+    const tasks=[...this.state.tasks];
+    const d={...this.state.taskDraft,id:this.state.taskDraft.id||('k'+Date.now())};
+    if(this.state.taskEdit.idx===-1) tasks.push(d); else tasks[this.state.taskEdit.idx]=d;
+    this.setState({tasks,taskEdit:null,taskDraft:{}});
+    try{localStorage.setItem('ws-tasks',JSON.stringify(tasks));}catch(e){}
+  }
+  deleteTask(idx){
+    const tasks=this.state.tasks.filter((_,i)=>i!==idx);
+    this.setState({tasks,taskEdit:null,taskDraft:{}});
+    try{localStorage.setItem('ws-tasks',JSON.stringify(tasks));}catch(e){}
+  }
+  cancelTaskEdit(){ this.setState({taskEdit:null,taskDraft:{}}); }
+  updateTaskDraft(f,v){ this.setState(s=>({taskDraft:{...s.taskDraft,[f]:v}})); }
+  openCalEdit(idx){
+    const evts=this.state.calEvents||this.eventsData();
+    const def=idx===-1?{title:'',who:'',s:9,e:10,arena:'Arena',type:'Open ride',color:'#9c7026'}:{...evts[idx]};
+    this.setState({calEdit:{idx},calDraft:def});
+  }
+  saveCalEvent(){
+    const tc={'Lesson':'#3C7A57','Open ride':'#9c7026','Groundwork':'#7A4A2B','Training':'#3C7A57','Blocked':'#B4502E','Other':'#5a6b8c'};
+    const d={...this.state.calDraft,id:'e'+Date.now(),color:tc[this.state.calDraft.type]||'#9c7026'};
+    const evts=[...(this.state.calEvents||this.eventsData())];
+    if(this.state.calEdit.idx===-1) evts.push(d); else evts[this.state.calEdit.idx]=d;
+    this.setState({calEvents:evts,calEdit:null,calDraft:{}});
+    try{localStorage.setItem('ws-cal-events',JSON.stringify(evts));}catch(e){}
+  }
+  deleteCalEvent(idx){
+    const evts=(this.state.calEvents||this.eventsData()).filter((_,i)=>i!==idx);
+    this.setState({calEvents:evts,calEdit:null,calDraft:{}});
+    try{localStorage.setItem('ws-cal-events',JSON.stringify(evts));}catch(e){}
+  }
+  cancelCalEdit(){ this.setState({calEdit:null,calDraft:{}}); }
+  updateCalDraft(f,v){ this.setState(s=>({calDraft:{...s.calDraft,[f]:v}})); }
+  openMedEdit(sec,hid,idx){
+    const h=this.horsesData().find(x=>x.id===hid)||{};
+    const arr=sec==='vax'?h.vax:sec==='care'?h.care:h.notes;
+    const def=idx===-1?(sec==='vax'?{n:'',d:'',s:'current'}:sec==='care'?{t:'',d:'',s:'ok'}:{type:'',date:'',who:'',note:''}):({...((arr||[])[idx])});
+    this.setState({medEdit:{sec,hid,idx},medDraft:def});
+  }
+  saveMedItem(){
+    const {sec,hid,idx}=this.state.medEdit;
+    const h=this.horsesData().find(x=>x.id===hid)||{};
+    const key=sec==='vax'?'vax':sec==='care'?'care':'notes';
+    const arr=[...(h[key]||[])];
+    if(idx===-1) arr.push({...this.state.medDraft});
+    else arr[idx]={...this.state.medDraft};
+    const horseEdits={...(this.state.horseEdits||{}),[hid]:{...((this.state.horseEdits||{})[hid]||{}),[key]:arr}};
+    this.setState({horseEdits,medEdit:null,medDraft:{}});
+    try{localStorage.setItem('ws-horse-edits',JSON.stringify(horseEdits));}catch(e){}
+  }
+  deleteMedItem(sec,hid,idx){
+    const h=this.horsesData().find(x=>x.id===hid)||{};
+    const key=sec==='vax'?'vax':sec==='care'?'care':'notes';
+    const arr=(h[key]||[]).filter((_,i)=>i!==idx);
+    const horseEdits={...(this.state.horseEdits||{}),[hid]:{...((this.state.horseEdits||{})[hid]||{}),[key]:arr}};
+    this.setState({horseEdits});
+    try{localStorage.setItem('ws-horse-edits',JSON.stringify(horseEdits));}catch(e){}
+  }
+
+  // ---------- render ----------
+  renderVals(){
+    const role = this.state.role;
+    const view = this.state.view;
+    const isMobile = (this.state.winWidth || 1200) < 768;
+    const sidebarOpen = !!this.state.sidebarOpen;
+    const toggleSidebar = () => this.setState(s=>({sidebarOpen:!s.sidebarOpen}));
+    const closeSidebar = () => this.setState({sidebarOpen:false});
+    const sidebarBase = {background:'linear-gradient(180deg,#1C3A2E,#15291F)',color:'#E9E2D0',display:'flex',flexDirection:'column',position:'relative'};
+    const sidebarStyle = isMobile
+      ? {...sidebarBase,width:'248px',flexShrink:0,position:'fixed',top:0,left:sidebarOpen?'0':'-260px',height:'100vh',zIndex:200,transition:'left .25s ease',boxShadow:sidebarOpen?'4px 0 24px rgba(0,0,0,.35)':'none'}
+      : {...sidebarBase,width:'248px',flexShrink:0,position:'sticky',top:0,height:'100vh'};
+    const overlayStyle = isMobile && sidebarOpen
+      ? {position:'fixed',inset:'0',background:'rgba(0,0,0,.4)',zIndex:199,cursor:'pointer'}
+      : {display:'none'};
+    const horses = this.horsesData();
+    const boarders = this.boardersData();
+    const ownerName = (id)=> (boarders.find(b=>b.id===id)||{}).name || '—';
+
+    // ----- roles -----
+    const roleStyle=(r)=>{
+      const on = role===r;
+      return `flex:1;border:none;border-radius:8px;padding:7px 4px;font-family:'Hanken Grotesk';font-size:12px;font-weight:600;cursor:pointer;`+
+        (on?`background:#C99A4A;color:#1C3A2E;box-shadow:0 2px 6px rgba(0,0,0,.2)`:`background:transparent;color:#A9C2B2`);
+    };
+    const roles = ['Manager','Staff','Boarder'].map(r=>({ label:r, style:roleStyle(r), onClick:()=>this.setRole(r) }));
+
+    // ----- nav (role aware) -----
+    const I = {
+      home:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>',
+      horse:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V9l4-3 3 2.5h3a3 3 0 0 1 3 3V21"/><path d="M5 13h6"/><path d="M9 21v-5"/></svg>',
+      people:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 14.4A5.5 5.5 0 0 1 20.5 19.5"/></svg>',
+      feed:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8Z"/><path d="M5 8l1-3.5h12L19 8"/></svg>',
+      tasks:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><rect x="3.5" y="4.5" width="17" height="16" rx="3"/><path d="M8 3v3M16 3v3"/></svg>',
+      medical:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 3 10 2-7 2 2h5"/></svg>',
+      calendar:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>',
+      message:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4V6a1 1 0 0 1 1-1Z"/></svg>',
+      map:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m9 4 6 2 5-2v14l-5 2-6-2-5 2V6Z"/><path d="M9 4v14M15 6v14"/></svg>',
+    };
+    const navStyle=(id)=>{
+      const on = (view===id) || (id==='horses'&&view==='horse') || (id==='boarders'&&view==='boarderProfile');
+      return `display:flex;align-items:center;gap:12px;width:100%;border:none;cursor:pointer;border-radius:11px;padding:11px 13px;font-family:'Hanken Grotesk';font-size:14px;font-weight:${on?600:500};`+
+        (on?`background:rgba(201,154,74,.16);color:#F3E7CB;box-shadow:inset 3px 0 0 #C99A4A`:`background:transparent;color:#BBD0C2`);
+    };
+    let defs = [
+      { id:'dashboard', label:'Dashboard', icon:I.home, roles:['Manager','Staff','Boarder'] },
+      { id:'horses', label: role==='Boarder'?'My Horses':'Horses', icon:I.horse, roles:['Manager','Staff','Boarder'] },
+      { id:'boarders', label:'Boarders', icon:I.people, roles:['Manager','Staff'] },
+      { id:'feeding', label:'Feeding Board', icon:I.feed, roles:['Manager','Staff'] },
+      { id:'tasks', label:'Daily Tasks', icon:I.tasks, roles:['Manager','Staff'], badge:String(this.state.tasks.filter(t=>!t.done).length) },
+      { id:'medical', label:'Medical Records', icon:I.medical, roles:['Manager','Staff','Boarder'] },
+      { id:'calendar', label:'Arena Calendar', icon:I.calendar, roles:['Manager','Staff','Boarder'] },
+      { id:'facility', label:'Facility Map', icon:I.map, roles:['Manager','Staff','Boarder'] },
+      { id:'messages', label:'Messages', icon:I.message, roles:['Manager','Staff','Boarder'], badge:'2' },
+    ];
+    const navItems = defs.filter(d=>d.roles.includes(role)).map(d=>({
+      label:d.label, icon:d.icon, badge:d.badge, style:navStyle(d.id), onClick:()=>{ this.go(d.id); if(isMobile) this.setState({sidebarOpen:false}); }
+    }));
+
+    // ----- topbar -----
+    const titles = {
+      dashboard:['Dashboard','Thursday, June 11 · 9 horses to ride today'],
+      horses:[ role==='Boarder'?'My Horses':'Horses', horses.length+' paddock horses · barn stalls coming'],
+      horse:['Horse Profile','Full record, health & feeding'],
+      boarders:['Boarders', boarders.length+' active boarding clients'],
+      boarderProfile:['Boarder Profile','Account, horses & contact'],
+      feeding:['Feeding Board','AM & PM rations by horse'],
+      tasks:['Daily Tasks','Barn chore checklist'],
+      medical:['Medical Records','Vaccinations, farrier & vet history'],
+      calendar:['Arena Calendar','Schedule rides, lessons & events'],
+      facility:['Facility Map','Stalls, paddocks & turnout occupancy'],
+      messages:['Messages','Staff & boarder conversations'],
+    };
+    const [pageTitle,pageSub] = titles[view] || titles.dashboard;
+
+    // ----- dashboard pieces -----
+    const greetName = role==='Boarder'?'Laine':(role==='Staff'?'Laine':'Chris & Eileen');
+    const greeting = `Good morning, ${greetName}`;
+    const tasks = this.state.tasks.map(t=>({
+      ...t,
+      onToggle:()=>this.toggleTask(t.id),
+      assigneeInitials:this.initials(t.assignee),
+      assigneeColor:this.personColor(t.assignee),
+      checkStyle:`width:22px;height:22px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:2px solid ${t.done?'#3C7A57':'#cfc3a8'};background:${t.done?'#3C7A57':'#fff'};transition:.15s`,
+      titleStyle:`font-size:14px;font-weight:600;color:${t.done?'#a9a08f':'#2f2a23'};text-decoration:${t.done?'line-through':'none'}`,
+    }));
+    const tasksDoneCount = tasks.filter(t=>t.done).length;
+    const tasksTotal = tasks.length;
+    const taskPct = Math.round(tasksDoneCount/tasksTotal*100)+'%';
+
+    const events = this.state.calEvents || this.eventsData();
+    const fmt=(h)=>{ const hr=Math.floor(h); const mn=Math.round((h-hr)*60); const ap=hr>=12?'PM':'AM'; let hh=hr%12; if(hh===0)hh=12; return `${hh}:${mn.toString().padStart(2,'0')} ${ap}`; };
+    const upcomingEvents = events.slice(0,5).map(e=>({ title:e.title, who:e.who, arena:e.arena, color:e.color, start:fmt(e.s), end:fmt(e.e) }));
+
+    const stats = [
+      { label:'Horses', value:String(horses.length), delta:'Paddock boarders · barn coming', tone:'#8A8170', icon:I.horse },
+      { label:'Paddocks', value:String(horses.length)+'/15', delta:'Occupied paddocks', tone:'#3C7A57', icon:I.home },
+      { label:'Tasks today', value:`${tasksDoneCount}/${tasksTotal}`, delta:`${tasksTotal-tasksDoneCount} remaining`, tone:'#9c7026', icon:I.tasks },
+      { label:'Health due', value:'—', delta:'Add vet records', tone:'#9a9081', icon:I.medical },
+      { label:'Boarders', value:String(boarders.length), delta:'Active paddock boarders', tone:'#8A8170', icon:I.people },
+    ];
+
+    // alerts derived from horse vax/care status
+    const alertTag=(s)=> s==='overdue'
+      ? 'font-size:10.5px;font-weight:700;color:#fff;background:#B4502E;padding:4px 9px;border-radius:20px;flex-shrink:0'
+      : 'font-size:10.5px;font-weight:700;color:#9c7026;background:#F6ECD2;border:1px solid #e6d3a4;padding:3px 9px;border-radius:20px;flex-shrink:0';
+    const alerts = horses.flatMap(h=>[
+      ...h.care.filter(c=>c.s!=='ok').map(c=>({hid:h.id,horse:h.name,label:c.t,due:c.d,s:c.s})),
+      ...h.vax.filter(v=>v.s!=='current').map(v=>({hid:h.id,horse:h.name,label:v.n,due:v.d,s:v.s})),
+    ]).map(a=>{ const h=horses.find(x=>x.id===a.hid); return { ...a, coat:this.coatGrad(h.coat), initial:h.name[0], tagStyle:alertTag(a.s), onClick:()=>this.openHorse(a.hid) }; });
+    const alertCount = alerts.length;
+
+    const pmFeed = horses.slice(0,4).map(h=>{ const id=h.id; const done=!!this.state.feedDone[id+'-pm']; return {
+      name:h.name, ration:h.ration.pm, stall:h.stall.replace('Stall','St.'), coat:this.coatGrad(h.coat), done,
+      onToggle:()=>this.toggleFeed(id+'-pm'),
+      checkStyle:`width:20px;height:20px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:2px solid ${done?'#9c7026':'#cfc3a8'};background:${done?'#9c7026':'#fff'};transition:.15s`,
+      nameStyle:`font-size:13.5px;font-weight:600;color:${done?'#a9a08f':'#2f2a23'};text-decoration:${done?'line-through':'none'}`,
+    }; });
+
+    const threads = this.threadsData();
+    const recentMessages = threads.slice(0,3).map(t=>({ name:t.name, role:t.role, snippet:t.snippet, unread:t.unread, color:t.color, initials:this.initials(t.name), onClick:()=>this.openThread(t.id) }));
+
+    // ===== HORSES DIRECTORY =====
+    const horseStatus=(h)=>{ const all=[...h.vax,...h.care];
+      if(all.some(x=>x.s==='overdue')) return {label:'Attention',style:'font-size:10.5px;font-weight:700;color:#fff;background:#B4502E;padding:3px 9px;border-radius:20px'};
+      if(all.some(x=>x.s==='due')) return {label:'Due soon',style:'font-size:10.5px;font-weight:700;color:#9c7026;background:#F6ECD2;border:1px solid #e6d3a4;padding:2px 8px;border-radius:20px'};
+      return {label:'Current',style:'font-size:10.5px;font-weight:700;color:#3C7A57;background:#E5F0E7;border:1px solid #c4dcc9;padding:2px 8px;border-radius:20px'};
+    };
+    const boarderHorseIds = ['h5']; // Laine / Rio (boarder view)
+    const visibleHorses = role==='Boarder' ? horses.filter(h=>boarderHorseIds.includes(h.id)) : horses;
+    const photos = this.state.photos || {};
+    const horseCards = visibleHorses.map(h=>{ const st=horseStatus(h); const ph=photos['horse-'+h.id]; return {
+      name:h.name, breed:h.breed||'—', sex:h.sex||'—', age:h.age?(h.age+' yrs'):'—', stall:h.stall, board:h.board,
+      coat:this.coatGrad(h.coat), coatName:h.coat, initial:h.name[0], owner:ownerName(h.owner),
+      hasPhoto:!!ph, noPhoto:!ph, photoBg: ph ? `center/cover no-repeat url("${ph}")` : this.coatGrad(h.coat),
+      statusLabel:st.label, statusStyle:st.style, onClick:()=>this.openHorse(h.id),
+    }; });
+    const horseCount = visibleHorses.length;
+
+    // ===== HORSE PROFILE =====
+    const hp = horses.find(h=>h.id===this.state.selectedHorse) || horses[0];
+    const hpOwner = boarders.find(b=>b.id===hp.owner) || {};
+    const vaxStyle=(s)=> s==='overdue'?'color:#fff;background:#B4502E'
+      : s==='due'?'color:#9c7026;background:#F6ECD2;border:1px solid #e6d3a4'
+      : s==='soon'?'color:#9c7026;background:#F6ECD2;border:1px solid #e6d3a4'
+      : 'color:#3C7A57;background:#E5F0E7;border:1px solid #c4dcc9';
+    const hpVax = hp.vax.map(v=>({ n:v.n, d:v.d, style:`font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;${vaxStyle(v.s)}`, statusText: v.s==='current'?'Current':(v.s==='overdue'?'Overdue':'Due') }));
+    const hpCare = hp.care.map(c=>({ t:c.t, d:c.d, style:`font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;${vaxStyle(c.s)}` }));
+    const hpNotes = hp.notes;
+    const isEditingHp = this.state.editingHorse === hp.id;
+    const hd = this.state.horseDraft || {};
+    const hiS = {width:'100%',padding:'7px 10px',border:'1.5px solid #C99A4A',borderRadius:'7px',fontSize:'13px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",outline:'none',background:'#FFFDF7',boxSizing:'border-box',color:'#2f2a23'};
+    const hF = (label,key,ph,ta) => React.createElement('div',{key,style:{display:'flex',flexDirection:'column',gap:'3px'}},
+      React.createElement('div',{style:{fontSize:'10px',color:'#9a9081',textTransform:'uppercase',letterSpacing:'.5px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif"}},label),
+      ta ? React.createElement('textarea',{value:hd[key]||'',onChange:e=>this.updateHorseDraft(key,e.target.value),placeholder:ph,rows:2,style:{...hiS,resize:'vertical',lineHeight:'1.45'}})
+         : React.createElement('input',{value:hd[key]||'',onChange:e=>this.updateHorseDraft(key,e.target.value),placeholder:ph,style:hiS})
+    );
+    const hpEditForm = isEditingHp ? React.createElement('div',{style:{marginTop:'6px'}},
+      React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'7px',marginBottom:'8px'}},
+        hF('Breed','breed','e.g. Quarter Horse'),hF('Sex','sex','Mare / Gelding'),
+        hF('Age','age','e.g. 7'),hF('Height','height','e.g. 15.1 hh'),
+        hF('Paddock / Stall','stall','e.g. Paddock W3'),hF('Arrived','arrived','e.g. Jun 2024')
+      ),
+      React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'7px',marginBottom:'12px'}},
+        hF('AM feed','am','Morning ration',true),
+        hF('PM feed','pm','Evening ration',true),
+        hF('Supplements','supp','Supplements / notes')
+      ),
+      React.createElement('div',{style:{display:'flex',gap:'8px'}},
+        React.createElement('button',{onClick:()=>this.saveHorse(),style:{flex:1,padding:'10px',background:'#1C3A2E',color:'#F1EBDB',border:'none',borderRadius:'9px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'13px',fontWeight:'600',cursor:'pointer'}},'Save changes'),
+        React.createElement('button',{onClick:()=>this.cancelEditHorse(),style:{padding:'10px 12px',background:'#FBF6EC',color:'#5a5345',border:'1px solid #E4D9C0',borderRadius:'9px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'13px',fontWeight:'600',cursor:'pointer'}},'Cancel')
+      )
+    ) : null;
+    const hp_ = {
+      name:hp.name, breed:hp.breed||'—', sex:hp.sex||'—', age:hp.age?(hp.age+' years'):'—', height:hp.height||'—', coat:this.coatGrad(hp.coat), coatName:hp.coat,
+      stall:hp.stall, board:hp.board, arrived:hp.arrived, owner:hpOwner.name||'—', ownerPhone:hpOwner.phone||'', ownerEmail:hpOwner.email||'',
+       am:hp.ration.am, pm:hp.ration.pm, supp:hp.ration.supp||'—', initial:hp.name[0],
+      ownerColor:this.personColor(hpOwner.name||''), ownerInitials:this.initials(hpOwner.name||''),
+      slot:'horse-'+hp.id, dropLabel:'Drop a photo of '+hp.name,
+      editMode:isEditingHp, notEditing:!isEditingHp,
+      onEdit:()=>this.startEditHorse(hp.id), editForm:hpEditForm,
+      backToHorses:()=>this.go('horses'),
+    };
+
+    // ===== HORSE MEDICAL CARDS (editable) =====
+    const _me=this.state.medEdit, _md=this.state.medDraft||{}, _hid=hp.id;
+    const _isMe=(s,i)=>_me&&_me.sec===s&&_me.hid===_hid&&_me.idx===i;
+    const _isAny=(s)=>_me&&_me.sec===s&&_me.hid===_hid;
+    const _isAdd=(s)=>_me&&_me.sec===s&&_me.hid===_hid&&_me.idx===-1;
+    const _cS={background:'#fff',border:'1px solid #E8DFCC',borderRadius:'16px',padding:'18px 20px',boxShadow:'0 1px 2px rgba(40,30,15,.04)'};
+    const _tS={fontFamily:"'Spectral',serif",fontSize:'18px',fontWeight:'600',color:'#23201C'};
+    const _iS={padding:'7px 10px',border:'1.5px solid #C99A4A',borderRadius:'7px',fontSize:'13px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",outline:'none',background:'#FFFDF7',color:'#2f2a23',boxSizing:'border-box'};
+    const _upd=(k,v)=>this.setState(s=>({medDraft:{...s.medDraft,[k]:v}}));
+    const _inp=(k,ph,val,x)=>React.createElement('input',{value:val||'',onChange:e=>_upd(k,e.target.value),placeholder:ph,style:{..._iS,...(x||{})}});
+    const _ta=(k,ph,val)=>React.createElement('textarea',{value:val||'',onChange:e=>_upd(k,e.target.value),placeholder:ph,rows:3,style:{..._iS,width:'100%',resize:'vertical',lineHeight:'1.45'}});
+    const _sel=(k,val,...opts)=>React.createElement('select',{value:val||opts[0][0],onChange:e=>_upd(k,e.target.value),style:{..._iS,cursor:'pointer'}},...opts.map(([v,l])=>React.createElement('option',{key:v,value:v},l)));
+    const _addB=(label,onClick)=>React.createElement('button',{onClick,style:{background:'none',border:'none',fontSize:'12px',fontWeight:'600',color:'#3C7A57',cursor:'pointer',display:'flex',alignItems:'center',gap:'4px'}},React.createElement('span',{style:{fontSize:'16px',lineHeight:'1'}},'+'),label);
+    const _icoB=(title,onClick,col)=>React.createElement('button',{title,onClick,style:{width:'24px',height:'24px',borderRadius:'6px',border:'1px solid #E4D9C0',background:'#FBF6EC',cursor:'pointer',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:'13px',color:col||'#7c7363',fontWeight:'700',padding:0,flexShrink:0}},title==='Edit'?'✎':'×');
+    const _sc=()=>React.createElement('div',{style:{display:'flex',gap:'7px',marginTop:'9px'}},React.createElement('button',{onClick:()=>this.saveMedItem(),style:{flex:1,padding:'9px',background:'#1C3A2E',color:'#F1EBDB',border:'none',borderRadius:'8px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'13px',fontWeight:'600',cursor:'pointer'}},'Save'),React.createElement('button',{onClick:()=>this.setState({medEdit:null,medDraft:{}}),style:{padding:'9px 13px',background:'#FBF6EC',color:'#5a5345',border:'1px solid #E4D9C0',borderRadius:'8px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'13px',cursor:'pointer'}},'Cancel'));
+    const _fw=(...ch)=>React.createElement('div',{style:{background:'#FBF6EC',border:'1px solid #EFE6D0',borderRadius:'10px',padding:'12px',marginTop:'8px'}},...ch,_sc());
+    const _vaxF=()=>_fw(React.createElement('div',{key:'g',style:{display:'grid',gridTemplateColumns:'2fr 1.2fr 1fr',gap:'7px'}},_inp('n','Vaccine name',_md.n),_inp('d','Date (e.g. Jun 2026)',_md.d),_sel('s',_md.s,['current','Current'],['due','Due soon'],['overdue','Overdue'])));
+    const _careF=()=>_fw(React.createElement('div',{key:'g',style:{display:'grid',gridTemplateColumns:'2fr 1.2fr 1fr',gap:'7px'}},_inp('t','Type (Farrier, Dental…)',_md.t),_inp('d','Date',_md.d),_sel('s',_md.s,['ok','OK'],['soon','Soon'],['due','Due'],['overdue','Overdue'])));
+    const _noteF=()=>_fw(React.createElement('div',{key:'g',style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'7px',marginBottom:'7px'}},_inp('type','Type (Vet visit…)',_md.type),_inp('date','Date',_md.date),_inp('who','Provider',_md.who,{gridColumn:'1/-1'})),_ta('note','Notes…',_md.note));
+    const _vaxDot=s=>s==='overdue'?'#B4502E':s==='due'?'#C99A4A':'#3C7A57';
+    const _vaxBadge=s=>({fontSize:'10.5px',fontWeight:'700',flexShrink:0,padding:'2px 9px',borderRadius:'20px',...(s==='overdue'?{color:'#fff',background:'#B4502E'}:s==='due'?{color:'#9c7026',background:'#F6ECD2',border:'1px solid #e6d3a4'}:{color:'#3C7A57',background:'#E5F0E7',border:'1px solid #c4dcc9'})});
+    const _vaxLbl=s=>s==='overdue'?'Overdue':s==='due'?'Due soon':'Current';
+    const _careChip=s=>({fontSize:'12px',fontWeight:'700',display:'inline-block',padding:'3px 9px',borderRadius:'20px',...(s==='overdue'||s==='due'?{color:'#B4502E',background:'#FBEAE2'}:s==='soon'?{color:'#9c7026',background:'#F6ECD2'}:{color:'#3C7A57',background:'#E5F0E7'})});
+    const _empty=msg=>React.createElement('div',{style:{fontSize:'13px',color:'#b3aa98',padding:'6px 0',fontStyle:'italic'}},msg);
+
+    const _vaxCard=React.createElement('div',{style:_cS},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'9px',marginBottom:'10px'}},
+        React.createElement('svg',{width:18,height:18,viewBox:'0 0 24 24',fill:'none',stroke:'#B4502E',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round'},React.createElement('path',{d:'m18 2 4 4-9 9-4 1 1-4Z'}),React.createElement('path',{d:'m14 6 4 4'}),React.createElement('path',{d:'M8 22a4 4 0 0 1-4-4c0-2 2-4 2-4'})),
+        React.createElement('div',{style:{..._tS,flex:1}},'Vaccinations'),_addB('Add',()=>this.openMedEdit('vax',_hid,-1))),
+      ...hp.vax.map((v,i)=>React.createElement('div',{key:i},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'10px',padding:'10px 0',borderBottom:'1px solid #F4EEDE'}},
+          React.createElement('span',{style:{width:'8px',height:'8px',borderRadius:'50%',background:_vaxDot(v.s),flexShrink:0}}),
+          React.createElement('div',{style:{flex:1,fontSize:'14px',fontWeight:'600',color:'#2f2a23'}},v.n||'—'),
+          React.createElement('span',{style:{fontSize:'12.5px',color:'#8A8170',flexShrink:0}},v.d),
+          React.createElement('span',{style:_vaxBadge(v.s)},_vaxLbl(v.s)),
+          _icoB('Edit',()=>this.openMedEdit('vax',_hid,i),'#9c7026'),
+          _icoB('Delete',()=>this.deleteMedItem('vax',_hid,i),'#B4502E')),
+        _isMe('vax',i)?_vaxF():null)),
+      _isAdd('vax')?_vaxF():null,
+      hp.vax.length===0&&!_isAny('vax')?_empty('No vaccinations logged yet'):null);
+
+    const _careCard=React.createElement('div',{style:_cS},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'9px',marginBottom:'13px'}},React.createElement('div',{style:{..._tS,flex:1}},'Routine care'),_addB('Add',()=>this.openMedEdit('care',_hid,-1))),
+      hp.care.length===0&&!_isAny('care')?_empty('No care records logged yet'):null,
+      React.createElement('div',{style:{display:'flex',gap:'9px',flexWrap:'wrap'}},
+        ...hp.care.map((c,i)=>React.createElement('div',{key:i,style:{flex:'1 1 120px',background:'#FBF8F0',border:'1px solid #EFE6D0',borderRadius:'12px',padding:'12px 14px',position:'relative'}},
+          React.createElement('div',{style:{position:'absolute',top:'7px',right:'7px',display:'flex',gap:'3px'}},_icoB('Edit',()=>this.openMedEdit('care',_hid,i),'#9c7026'),_icoB('Delete',()=>this.deleteMedItem('care',_hid,i),'#B4502E')),
+          React.createElement('div',{style:{fontSize:'12px',color:'#8A8170',marginBottom:'6px',paddingRight:'52px'}},c.t),
+          React.createElement('span',{style:_careChip(c.s)},c.d)))),
+      ...hp.care.map((_,i)=>_isMe('care',i)?_careF():null),
+      _isAdd('care')?_careF():null);
+
+    const _noteCard=React.createElement('div',{style:_cS},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'9px',marginBottom:'14px'}},React.createElement('div',{style:{..._tS,flex:1}},'Medical history'),_addB('Add entry',()=>this.openMedEdit('note',_hid,-1))),
+      hp.notes.length===0&&!_isAny('note')?_empty('No history logged yet'):null,
+      ...hp.notes.map((n,i)=>React.createElement('div',{key:i},
+        React.createElement('div',{style:{display:'flex',gap:'14px',paddingBottom:'12px'}},
+          React.createElement('div',{style:{display:'flex',flexDirection:'column',alignItems:'center',flexShrink:0}},React.createElement('div',{style:{width:'11px',height:'11px',borderRadius:'50%',background:'#3C7A57',border:'2.5px solid #cfe2d4'}}),React.createElement('div',{style:{width:'2px',flex:1,background:'#EDE5D2',marginTop:'3px'}})),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'3px',flexWrap:'wrap'}},React.createElement('span',{style:{fontSize:'14px',fontWeight:'700',color:'#2f2a23'}},n.type||'Note'),React.createElement('span',{style:{fontSize:'11.5px',color:'#9a9081'}},n.date?(n.date+(n.who?' · '+n.who:'')):'')),
+            React.createElement('div',{style:{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:'8px'}},React.createElement('div',{style:{fontSize:'13.5px',color:'#5a5345',lineHeight:'1.5',flex:1}},n.note),React.createElement('div',{style:{display:'flex',gap:'4px',flexShrink:0}},_icoB('Edit',()=>this.openMedEdit('note',_hid,i),'#9c7026'),_icoB('Delete',()=>this.deleteMedItem('note',_hid,i),'#B4502E'))))),
+        _isMe('note',i)?_noteF():null)),
+      _isAdd('note')?_noteF():null);
+
+    const hpMedCards=React.createElement(React.Fragment,null,_vaxCard,_careCard,_noteCard);
+
+    // ===== BOARDERS =====
+    const boarderCards = boarders.map(b=>{ const bph=photos['boarder-'+b.id]; return {
+      name:b.name, phone:b.phone, email:b.email, since:b.since,
+      initials:this.initials(b.name), color:this.personColor(b.name),
+      hasPhoto:!!bph, noPhoto:!bph, avatarBg: bph ? `center/cover no-repeat url("${bph}")` : this.personColor(b.name),
+      horseNames:b.horses.map(id=>(horses.find(h=>h.id===id)||{}).name).join(', '),
+      horseCount:b.horses.length+(b.horses.length===1?' horse':' horses'),
+      balance: b.balance>0 ? '$'+b.balance+' due' : 'Paid up',
+      balanceStyle: b.balance>0 ? 'font-size:11.5px;font-weight:700;color:#B4502E' : 'font-size:11.5px;font-weight:600;color:#3C7A57',
+      onClick:()=>this.openBoarder(b.id),
+    }; });
+
+    // ===== BOARDER PROFILE =====
+    const bp = boarders.find(b=>b.id===this.state.selectedBoarder) || boarders[0];
+    const isEditingBp = this.state.editingBoarder === bp.id;
+    const draft = this.state.boarderDraft || {};
+    const iStyle = {width:'100%',padding:'8px 11px',border:'1.5px solid #C99A4A',borderRadius:'8px',fontSize:'14px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",outline:'none',background:'#FFFDF7',boxSizing:'border-box',color:'#2f2a23',marginTop:'4px'};
+    const editField = (label, key, ph) => React.createElement('div',{key},
+      React.createElement('div',{style:{fontSize:'10.5px',color:'#9a9081',textTransform:'uppercase',letterSpacing:'.5px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",marginTop:'8px'}},label),
+      React.createElement('input',{value:draft[key]||'',onChange:(e)=>this.updateDraft(key,e.target.value),placeholder:ph,style:iStyle})
+    );
+    const bpEditForm = isEditingBp ? React.createElement('div',{style:{textAlign:'left'}},
+      editField('Name','name','Boarder name'),
+      editField('Phone','phone','Phone number'),
+      editField('Email','email','Email address'),
+      editField('Boarding since','since','e.g. Jun 2024'),
+      React.createElement('div',{style:{display:'flex',gap:'8px',marginTop:'16px'}},
+        React.createElement('button',{onClick:()=>this.saveBoarder(),style:{flex:1,padding:'10px',background:'#1C3A2E',color:'#F1EBDB',border:'none',borderRadius:'9px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'13.5px',fontWeight:'600',cursor:'pointer'}},'Save changes'),
+        React.createElement('button',{onClick:()=>this.cancelEditBoarder(),style:{padding:'10px 14px',background:'#FBF6EC',color:'#5a5345',border:'1px solid #E4D9C0',borderRadius:'9px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'13.5px',fontWeight:'600',cursor:'pointer'}},'Cancel')
+      )
+    ) : null;
+    const bp_ = {
+      name:bp.name, phone:bp.phone||'—', email:bp.email||'—', since:bp.since,
+      sinceLabel:bp.since||'—', editMode:isEditingBp, notEditing:!isEditingBp,
+      onEdit:()=>this.startEditBoarder(bp.id), editForm:bpEditForm,
+      initials:this.initials(bp.name), color:this.personColor(bp.name),
+      balance: bp.balance>0 ? '$'+bp.balance+'.00' : '$0.00',
+      balanceLabel: bp.balance>0 ? 'Balance due' : 'Paid in full',
+      balanceColor: bp.balance>0 ? '#B4502E' : '#3C7A57',
+      slot:'boarder-'+bp.id, dropLabel:'Drop a photo',
+      backToBoarders:()=>this.go('boarders'),
+      horses: bp.horses.map(id=>{ const h=horses.find(x=>x.id===id); const ph=photos['horse-'+id]; return { name:h.name, breed:h.breed||'—', board:h.board, stall:h.stall, coat:this.coatGrad(h.coat), initial:h.name[0], noPhoto:!ph, photoBg: ph?`center/cover no-repeat url("${ph}")`:this.coatGrad(h.coat), onClick:()=>this.openHorse(h.id) }; }),
+    };
+
+    // ===== FEEDING BOARD =====
+    const feedRows = horses.map(h=>{ const amDone=!!this.state.feedDone[h.id+'-am']; const pmDone=!!this.state.feedDone[h.id+'-pm']; return {
+      name:h.name, stall:h.stall, coat:this.coatGrad(h.coat), initial:h.name[0], am:h.ration.am, pm:h.ration.pm, supp:h.ration.supp,
+      amDone, pmDone,
+      amStyle:`width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;border:2px solid ${amDone?'#9c7026':'#cfc3a8'};background:${amDone?'#9c7026':'#fff'}`,
+      pmStyle:`width:24px;height:24px;border-radius:7px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;border:2px solid ${pmDone?'#3C7A57':'#cfc3a8'};background:${pmDone?'#3C7A57':'#fff'}`,
+      toggleAm:()=>this.toggleFeed(h.id+'-am'), togglePm:()=>this.toggleFeed(h.id+'-pm'),
+    }; });
+    const amCount = horses.filter(h=>this.state.feedDone[h.id+'-am']).length;
+    const pmCount = horses.filter(h=>this.state.feedDone[h.id+'-pm']).length;
+
+    // ===== TASKS (full) =====
+    const catColor={Barn:'#7A4A2B','Barn A':'#7A4A2B','Barn B':'#7A4A2B',Pastures:'#3C7A57',Paddocks:'#3C7A57','All areas':'#9c7026','All barns':'#9c7026',Arena:'#5a6b8c','Round pens':'#B4502E'};
+    const fullTasks = this.state.tasks.map((t,idx)=>({
+      ...t, onToggle:()=>this.toggleTask(t.id), assigneeInitials:this.initials(t.assignee), assigneeColor:this.personColor(t.assignee),
+      checkStyle:`width:24px;height:24px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:2px solid ${t.done?'#3C7A57':'#cfc3a8'};background:${t.done?'#3C7A57':'#fff'}`,
+      titleStyle:`font-size:15px;font-weight:600;color:${t.done?'#a9a08f':'#2f2a23'};text-decoration:${t.done?'line-through':'none'}`,
+      areaDot:catColor[t.area]||'#9c7026',
+      onEdit:(ev)=>{ev.stopPropagation();this.openTaskEdit(idx);},
+      onDelete:(ev)=>{ev.stopPropagation();this.deleteTask(idx);},
+    }));
+    // task edit modal
+    const _te=this.state.taskEdit, _td=this.state.taskDraft||{};
+    const _tInS={width:'100%',padding:'9px 12px',border:'1.5px solid #C99A4A',borderRadius:'9px',fontSize:'14px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",outline:'none',background:'#FFFDF7',color:'#2f2a23',boxSizing:'border-box'};
+    const _tSelS={..._tInS,background:'#fff',border:'1.5px solid #E4D9C0',cursor:'pointer'};
+    const _tLbl=(t)=>React.createElement('div',{style:{fontSize:'11px',color:'#9a9081',textTransform:'uppercase',letterSpacing:'.5px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",marginBottom:'4px'}},t);
+    const taskEditPanel = _te ? React.createElement('div',{style:{position:'fixed',inset:'0',background:'rgba(0,0,0,.45)',zIndex:400,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}},
+      React.createElement('div',{style:{background:'#fff',borderRadius:'18px',padding:'24px',width:'100%',maxWidth:'440px',boxShadow:'0 24px 60px rgba(0,0,0,.3)'}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'12px',marginBottom:'20px'}},
+          React.createElement('div',{style:{fontFamily:"'Spectral',serif",fontSize:'20px',fontWeight:'600',color:'#23201C',flex:1}},_te.idx===-1?'Add task':'Edit task'),
+          _te.idx!==-1?React.createElement('button',{onClick:()=>this.deleteTask(_te.idx),style:{padding:'7px 13px',background:'#FBEAE2',color:'#B4502E',border:'none',borderRadius:'8px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'13px',fontWeight:'600',cursor:'pointer'}},'Delete'):null,
+          React.createElement('button',{onClick:()=>this.cancelTaskEdit(),style:{width:'32px',height:'32px',borderRadius:'8px',border:'1px solid #E4D9C0',background:'#FBF6EC',color:'#5a5345',fontSize:'18px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexShrink:0}},'×')
+        ),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'13px'}},
+          React.createElement('div',null,_tLbl('Task'),React.createElement('input',{value:_td.title||'',onChange:e=>this.updateTaskDraft('title',e.target.value),placeholder:'e.g. Morning feed — AM round',style:_tInS})),
+          React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}},
+            React.createElement('div',null,_tLbl('Area'),
+              React.createElement('select',{value:_td.area||'Barn',onChange:e=>this.updateTaskDraft('area',e.target.value),style:_tSelS},
+                ...['Barn','Paddocks','All areas','Covered Arena','Hay room','Other'].map(a=>React.createElement('option',{key:a,value:a},a))
+              )
+            ),
+            React.createElement('div',null,_tLbl('Time'),React.createElement('input',{value:_td.time||'',onChange:e=>this.updateTaskDraft('time',e.target.value),placeholder:'e.g. 6:00 AM',style:_tInS}))
+          ),
+          React.createElement('div',null,_tLbl('Assign to'),
+            React.createElement('select',{value:_td.assignee||'Laine',onChange:e=>this.updateTaskDraft('assignee',e.target.value),style:_tSelS},
+              React.createElement('option',{value:'Laine'},'Laine'),
+              React.createElement('option',{value:'Stoney'},'Stoney'),
+              React.createElement('option',{value:'Chris & Eileen'},'Chris & Eileen'),
+              React.createElement('option',{value:'Other'},'Other')
+            )
+          )
+        ),
+        React.createElement('div',{style:{display:'flex',gap:'10px',marginTop:'22px'}},
+          React.createElement('button',{onClick:()=>this.saveTask(),style:{flex:1,padding:'12px',background:'#1C3A2E',color:'#F1EBDB',border:'none',borderRadius:'11px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'14px',fontWeight:'600',cursor:'pointer'}},_te.idx===-1?'Add task':'Save changes'),
+          React.createElement('button',{onClick:()=>this.cancelTaskEdit(),style:{padding:'12px 18px',background:'#FBF6EC',color:'#5a5345',border:'1px solid #E4D9C0',borderRadius:'11px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'14px',cursor:'pointer'}},'Cancel')
+        )
+      )
+    ) : null;
+
+    // ===== MEDICAL =====
+    const dueItems=[];
+    horses.forEach(h=>{ h.care.forEach(c=>{ if(c.s!=='ok') dueItems.push({horse:h.name,hid:h.id,coat:this.coatGrad(h.coat),initial:h.name[0],type:c.t,when:c.d,s:c.s}); });
+      h.vax.forEach(v=>{ if(v.s!=='current') dueItems.push({horse:h.name,hid:h.id,coat:this.coatGrad(h.coat),initial:h.name[0],type:v.n,when:v.d,s:v.s}); }); });
+    const ord={overdue:0,due:1,soon:2};
+    dueItems.sort((a,b)=>(ord[a.s]-ord[b.s]));
+    const medDue = dueItems.map(d=>({ ...d, onClick:()=>this.openHorse(d.hid),
+      tagStyle: d.s==='overdue'?'font-size:10.5px;font-weight:700;color:#fff;background:#B4502E;padding:3px 10px;border-radius:20px':'font-size:10.5px;font-weight:700;color:#9c7026;background:#F6ECD2;border:1px solid #e6d3a4;padding:2px 9px;border-radius:20px',
+      sLabel: d.s==='overdue'?'Overdue':(d.s==='soon'?'Soon':'Due') }));
+    const findVax=(h,kw)=> h.vax.find(v=>v.n.toLowerCase().includes(kw)) || {d:'—',s:'current'};
+    const dot=(s)=> s==='overdue'?'#B4502E':(s==='due'?'#C99A4A':(s==='soon'?'#C99A4A':'#3C7A57'));
+    const vaxMatrix = horses.map(h=>({ name:h.name, coat:this.coatGrad(h.coat), initial:h.name[0], onClick:()=>this.openHorse(h.id),
+      cells:[ findVax(h,'coggins'), findVax(h,'ewt'), findVax(h,'rabies'), findVax(h,'flu') ].map(v=>({ d:v.d, dot:dot(v.s) })) }));
+    const vetNotes=[];
+    horses.forEach(h=>{ h.notes.forEach(n=>{ if(n.type==='Vet visit'||n.type==='Spring shots'||n.type==='Lameness') vetNotes.push({horse:h.name,coat:this.coatGrad(h.coat),initial:h.name[0],date:n.date,type:n.type,note:n.note,who:n.who,hid:h.id}); }); });
+    const medNotes = vetNotes.slice(0,6).map(n=>({ ...n, onClick:()=>this.openHorse(n.hid) }));
+
+    // ===== CALENDAR =====
+    const dayStart=6, dayEnd=20, pxH=58;
+    const fmtHour=(h)=>{ const ap=h>=12?'PM':'AM'; let hh=h%12; if(hh===0)hh=12; return hh+' '+ap; };
+    const hourRows=[]; for(let h=dayStart;h<=dayEnd;h++) hourRows.push({ label:fmtHour(h), top:(h-dayStart)*pxH });
+    const arenaList=['Arena','Round Pen 1','Round Pen 2'];
+    const calArenas = arenaList.map(a=>({ name:a,
+      events: events.map((e,gi)=>({...e,gi})).filter(e=>e.arena===a).map(e=>({ title:e.title, who:e.who, type:e.type, timeLabel:`${fmt(e.s)} – ${fmt(e.e)}`,
+        onEdit:()=>this.openCalEdit(e.gi),
+        onDelete:(ev)=>{ev.stopPropagation();this.deleteCalEvent(e.gi);},
+        style:`position:absolute;left:7px;right:7px;top:${(e.s-dayStart)*pxH+2}px;height:${(e.e-e.s)*pxH-5}px;background:#fff;border:1px solid #E8DFCC;border-left:4px solid ${e.color};border-radius:10px;padding:8px 11px;overflow:hidden;box-shadow:0 2px 6px rgba(40,30,15,.07);cursor:pointer` })) }));
+    const calHeight=(dayEnd-dayStart)*pxH;
+
+    // ===== MESSAGES =====
+    const threadCards = threads.map(t=>({ name:t.name, role:t.role, snippet:t.snippet, time:t.time, unread:t.unread, color:t.color, initials:this.initials(t.name),
+      active: t.id===this.state.activeThread,
+      rowStyle:`display:flex;gap:12px;padding:13px 14px;border-radius:13px;cursor:pointer;${t.id===this.state.activeThread?'background:#F1EBDB':'background:transparent'}`,
+      onClick:()=>this.setState({activeThread:t.id}) }));
+    const at = threads.find(t=>t.id===this.state.activeThread) || threads[0];
+    const activeThread = { name:at.name, role:at.role, color:this.personColor(at.name), initials:this.initials(at.name),
+      msgs: at.msgs.map(m=>({ x:m.x, t:m.t, me:m.me,
+        bubbleStyle:`max-width:74%;padding:10px 14px;border-radius:16px;font-size:13.5px;line-height:1.45;${m.me?'background:#1C3A2E;color:#F1EBDB;border-bottom-right-radius:5px':'background:#fff;color:#2f2a23;border:1px solid #E8DFCC;border-bottom-left-radius:5px'}`,
+        rowStyle:`display:flex;${m.me?'justify-content:flex-end':'justify-content:flex-start'}`,
+        metaStyle:`font-size:10.5px;color:#a9a08f;margin-top:4px;${m.me?'text-align:right':'text-align:left'}` })) };
+
+    // ===== FACILITY MAP =====
+    const byLoc={}; horses.forEach(h=>{ if(!byLoc[h.stall]) byLoc[h.stall]=h; });
+    const spot=(label,short)=>{ const h=byLoc[label]; return { label:short, occupied:!!h, name:h?h.name:'Open',
+      dot:h?this.coatGrad(h.coat):'#E4DBC6', initial:h?h.name[0]:'',
+      style:`display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:11px;border:1px solid ${h?'#E8DFCC':'#EEE6D4'};background:${h?'#fff':'#FAF6EC'};cursor:${h?'pointer':'default'}`,
+      nameStyle:`font-size:13px;font-weight:600;color:${h?'#2f2a23':'#b3aa98'}`,
+      photoBg: (h&&photos['horse-'+h.id])?`center/cover no-repeat url("${photos['horse-'+h.id]}")`:(h?this.coatGrad(h.coat):'#E4DBC6'),
+      onClick: h?()=>this.openHorse(h.id):()=>{} }; };
+    const facStalls = Array.from({length:8},(_,i)=>spot('Stall '+(i+1), i+1));
+    const facWest = Array.from({length:13},(_,i)=>spot('Paddock W'+(i+1), 'W'+(i+1)));
+    const facEast = [1,2].map(n=>spot('Paddock E'+n, 'E'+n));
+    const facStallsFilled = facStalls.filter(s=>s.occupied).length;
+    const facPaddocksFilled = [...facWest,...facEast].filter(s=>s.occupied).length;
+
+    // ===== CALENDAR EDIT PANEL =====
+    const _ce = this.state.calEdit, _cd2 = this.state.calDraft||{};
+    const _iS2 = {width:'100%',padding:'9px 12px',border:'1.5px solid #C99A4A',borderRadius:'9px',fontSize:'14px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",outline:'none',background:'#FFFDF7',color:'#2f2a23',boxSizing:'border-box'};
+    const _selS2 = {..._iS2,background:'#fff',border:'1.5px solid #E4D9C0',cursor:'pointer'};
+    const _lbl2 = (t) => React.createElement('div',{style:{fontSize:'11px',color:'#9a9081',textTransform:'uppercase',letterSpacing:'.5px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",marginBottom:'4px'}},t);
+    const _inp2 = (k,ph,val) => React.createElement('input',{value:val||'',onChange:e=>this.updateCalDraft(k,e.target.value),placeholder:ph,style:_iS2});
+    const _timeOpts = [];
+    for(let h=6;h<=21;h+=0.5){ const hr=Math.floor(h),mn=Math.round((h-hr)*60),ap=hr>=12?'PM':'AM'; let hh=hr%12; if(hh===0)hh=12; _timeOpts.push([String(h),`${hh}:${mn.toString().padStart(2,'0')} ${ap}`]); }
+    const calEditPanel = _ce ? React.createElement('div',{style:{position:'fixed',inset:'0',background:'rgba(0,0,0,.45)',zIndex:400,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}},
+      React.createElement('div',{style:{background:'#fff',borderRadius:'18px',padding:'24px',width:'100%',maxWidth:'480px',maxHeight:'90vh',overflowY:'auto',boxShadow:'0 24px 60px rgba(0,0,0,.3)'}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:'12px',marginBottom:'20px'}},
+          React.createElement('div',{style:{fontFamily:"'Spectral',serif",fontSize:'20px',fontWeight:'600',color:'#23201C',flex:1}},_ce.idx===-1?'Book arena':'Edit booking'),
+          _ce.idx!==-1 ? React.createElement('button',{onClick:()=>this.deleteCalEvent(_ce.idx),style:{padding:'7px 13px',background:'#FBEAE2',color:'#B4502E',border:'none',borderRadius:'8px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'13px',fontWeight:'600',cursor:'pointer'}},'Delete') : null,
+          React.createElement('button',{onClick:()=>this.cancelCalEdit(),style:{width:'32px',height:'32px',borderRadius:'8px',border:'1px solid #E4D9C0',background:'#FBF6EC',color:'#5a5345',fontSize:'18px',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexShrink:0}},'×')
+        ),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'13px'}},
+          React.createElement('div',null,_lbl2('Title'),_inp2('title','e.g. Lesson · Training session…',_cd2.title)),
+          React.createElement('div',null,_lbl2('Rider / Horse'),_inp2('who','e.g. Laine · Rio',_cd2.who)),
+          React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}},
+            React.createElement('div',null,_lbl2('Arena'),
+              React.createElement('select',{value:_cd2.arena||'Arena',onChange:e=>this.updateCalDraft('arena',e.target.value),style:_selS2},
+                React.createElement('option',{value:'Arena'},'Covered Arena'),
+                React.createElement('option',{value:'Round Pen 1'},'Round Pen 1'),
+                React.createElement('option',{value:'Round Pen 2'},'Round Pen 2')
+              )
+            ),
+            React.createElement('div',null,_lbl2('Type'),
+              React.createElement('select',{value:_cd2.type||'Open ride',onChange:e=>this.updateCalDraft('type',e.target.value),style:_selS2},
+                ...['Lesson','Open ride','Groundwork','Training','Blocked','Other'].map(t=>React.createElement('option',{key:t,value:t},t))
+              )
+            )
+          ),
+          React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}},
+            React.createElement('div',null,_lbl2('Start time'),
+              React.createElement('select',{value:String(_cd2.s||9),onChange:e=>this.updateCalDraft('s',parseFloat(e.target.value)),style:_selS2},
+                ..._timeOpts.map(([v,l])=>React.createElement('option',{key:v,value:v},l))
+              )
+            ),
+            React.createElement('div',null,_lbl2('End time'),
+              React.createElement('select',{value:String(_cd2.e||10),onChange:e=>this.updateCalDraft('e',parseFloat(e.target.value)),style:_selS2},
+                ..._timeOpts.map(([v,l])=>React.createElement('option',{key:v,value:v},l))
+              )
+            )
+          )
+        ),
+        React.createElement('div',{style:{display:'flex',gap:'10px',marginTop:'22px'}},
+          React.createElement('button',{onClick:()=>this.saveCalEvent(),style:{flex:1,padding:'12px',background:'#1C3A2E',color:'#F1EBDB',border:'none',borderRadius:'11px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'14px',fontWeight:'600',cursor:'pointer'}},'Save booking'),
+          React.createElement('button',{onClick:()=>this.cancelCalEdit(),style:{padding:'12px 18px',background:'#FBF6EC',color:'#5a5345',border:'1px solid #E4D9C0',borderRadius:'11px',fontFamily:"'Hanken Grotesk',system-ui,sans-serif",fontSize:'14px',cursor:'pointer'}},'Cancel')
+        )
+      )
+    ) : null;
+
+    return {
+      facStalls, facWest, facEast, facStallsFilled, facPaddocksFilled,
+      isFacility: view==='facility',
+      // view flags
+      isHorses: view==='horses', isHorseProfile: view==='horse', isBoarders: view==='boarders',
+      isBoarderProfile: view==='boarderProfile', isFeeding: view==='feeding', isTasks: view==='tasks',
+      isMedical: view==='medical', isCalendar: view==='calendar', isMessages: view==='messages',
+      // screen data
+      horseCards, horseCount, horsesHeading: role==='Boarder'?'Your horses':'All horses',
+      hp:hp_, hpVax, hpCare, hpNotes, hpMedCards,
+      boarderCards, bp:bp_,
+      feedRows, amCount, pmCount, feedTotal:horses.length,
+      fullTasks,
+      medDue, medDueCount:medDue.length, vaxMatrix, medNotes,
+      hourRows, calArenas, calHeight, calEditPanel, goBookArena:()=>this.openCalEdit(-1),
+      threadCards, activeThread,
+      // sidebar/topbar
+      roles, navItems, isMobile, sidebarStyle, overlayStyle, toggleSidebar, closeSidebar,
+      currentUserName: role==='Boarder'?'Laine':(role==='Staff'?'Laine':'Chris & Eileen Sikes'),
+      currentUserRole: role==='Boarder'?'Boarder · Rio':(role==='Staff'?'Stable Manager':'Owners'),
+      currentUserInitials: role==='Boarder'?'LA':(role==='Staff'?'LA':'CS'),
+      pageTitle, pageSub,
+      goNewTask:()=>this.go('tasks'),
+      // view flags
+      isDashboard: view==='dashboard',
+      // dashboard
+      greeting, todayLong:'Thursday, June 11, 2026', dashboardSummary:`${tasksTotal-tasksDoneCount} tasks left · ${alertCount} health alerts`,
+      stats, upcomingEvents,
+      tasks, tasksDoneCount, tasksTotal, taskPct,
+      alerts, alertCount, pmFeed, recentMessages,
+      goCalendar:()=>this.go('calendar'), goFeeding:()=>this.go('feeding'), goMessages:()=>this.go('messages'), goBookArena:()=>this.openCalEdit(-1),
+    };
+  }
+}
+</script>
+</body>
+</html>

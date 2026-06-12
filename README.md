@@ -1,29 +1,14 @@
 # The Winner's Stable
 
-Barn management app for The Winner's Stable, Georgetown TX.
+Full barn management app — self-contained single file.
 
-## Deploy
+## How to deploy to GitHub Pages
 
-This repo uses **GitHub Pages**. The entire app is bundled into `index.html` — no build step, no dependencies.
+1. Upload `index.html` and `.nojekyll` to the **root** of this repo
+2. Go to **Settings → Pages** → Source: `Deploy from branch: main / (root)`
+3. Commit — site rebuilds in ~60 seconds at `https://stoneyw.github.io/TheWinnersStable/`
 
-**Live site:** https://stoneyw.github.io/TheWinnersStable/
+## IMPORTANT — Replace ALL files when updating
 
-## Updating the site
-
-1. Make changes in the design tool
-2. Re-export a new `index.html` (standalone bundle)
-3. Replace `index.html` in this repo and commit — Pages rebuilds in ~60 seconds
-
-## Features
-
-- Dashboard with stats, arena schedule, tasks, feed board
-- Horse profiles with feeding instructions (paddocks + barn stalls)
-- Boarder directory with contact info
-- Daily task checklist
-- Arena calendar with bookings
-- Facilities map (paddocks + stalls)
-- Staff directory
-- Messaging inbox
-- Role-based views: Manager / Staff / Boarder
-- Mobile-responsive with collapsible sidebar
-- All edits persist locally in the browser
+Delete the old `index.html` before uploading the new one.
+The `.nojekyll` file must always be present — it stops GitHub from breaking the HTML.
